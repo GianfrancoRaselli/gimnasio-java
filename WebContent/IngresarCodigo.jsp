@@ -1,9 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8" session="true"%>
     
-<%@ page import="Entidades.*, Controlador.*"%>
+<%@ page import="Entidades.*, Controlador.*, Servlets.*"%>
 
 	<% 
+	try
+	{
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response.setHeader("Pragma", "no-cache");
 		response.setHeader("Expires", "0");
@@ -121,11 +123,12 @@
 </style>
 
 </head>
-<body>
+
+<body style="padding-right: 1%; padding-left: 1%;">
 
 <% Usuario userEncontrado = (Usuario)request.getAttribute("usuarioEncontrado"); %>
 
-		<form action="ControladorRecuperarContrasenia" method="post" name="login">
+		<form action="ServletRecuperarContrasenia" method="post" name="login">
 			<input type="hidden" name="instruccion" value="ingresar_codigo">
 			<input type="hidden" name="nombre_usuario" value="<%= userEncontrado.getNombreUsuario()%>">
 			
@@ -164,4 +167,10 @@
 
 </body>
 </html>
-<%}%>
+<%}}
+catch(Exception e)
+{
+	RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+	request.setAttribute("exception", e);
+	dispatcher.forward(request, response);
+}%>

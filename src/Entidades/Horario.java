@@ -1,6 +1,6 @@
 package Entidades;
 
-import java.sql.Time;
+import java.sql.Timestamp;
 
 public class Horario 
 {
@@ -9,9 +9,12 @@ public class Horario
 	}
 	private Dia dia;
 	private Sucursal sucursal;
-	private Time idHoraDesde;
-	private Time horaDesde;
-	private Time horaHasta;
+	private Timestamp idHoraDesde;
+	private Timestamp horaDesde;
+	private Timestamp horaHasta;
+	private String idHoraDesdeString;
+	private String horaDesdeString;
+	private String horaHastaString;
 	@Override
 	public String toString() {
 		return "Horario [dia=" + dia + ", sucursal=" + sucursal + ", horaDesde=" + horaDesde + ", horaHasta="
@@ -29,22 +32,22 @@ public class Horario
 	public void setSucursal(Sucursal sucursal) {
 		this.sucursal = sucursal;
 	}
-	public Time getHoraDesde() {
+	public Timestamp getHoraDesde() {
 		return horaDesde;
 	}
-	public void setHoraDesde(Time horaDesde) {
+	public void setHoraDesde(Timestamp horaDesde) {
 		this.horaDesde = horaDesde;
 	}
-	public Time getIdHoraDesde() {
+	public Timestamp getIdHoraDesde() {
 		return idHoraDesde;
 	}
-	public void setIdHoraDesde(Time idHoraDesde) {
+	public void setIdHoraDesde(Timestamp idHoraDesde) {
 		this.idHoraDesde = idHoraDesde;
 	}
-	public Time getHoraHasta() {
+	public Timestamp getHoraHasta() {
 		return horaHasta;
 	}
-	public void setHoraHasta(Time horaHasta) {
+	public void setHoraHasta(Timestamp horaHasta) {
 		this.horaHasta = horaHasta;
 	}
 	@Override
@@ -81,5 +84,23 @@ public class Horario
 		} else if (!sucursal.equals(other.sucursal))
 			return false;
 		return true;
+	}
+	public String getIdHoraDesdeString() {
+		return idHoraDesdeString;
+	}
+	public void setIdHoraDesdeString(String idHoraDesdeString) {
+		this.idHoraDesdeString = idHoraDesdeString;
+	}
+	public String getHoraDesdeString() {
+		return horaDesdeString;
+	}
+	public void setHoraDesdeString(String horaDesdeString) {
+		this.horaDesdeString = horaDesdeString;
+	}
+	public String getHoraHastaString() {
+		return horaHastaString;
+	}
+	public void setHoraHastaString(String horaHastaString) {
+		this.horaHastaString = horaHastaString;
 	}
 }

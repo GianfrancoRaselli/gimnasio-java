@@ -11,26 +11,25 @@ public class ConnectionPool
 	private BasicDataSource basicDataSource = null;
 	
 	private final String driver = "com.mysql.cj.jdbc.Driver";
-	private final String host = "localhost";
+	private final String host = "localhost";//node59720-gimnasio-java.jelastic.saveincloud.net
 	private final String port = "3306";
 	private final String user = "java";
-	private final String password = "java";
+	private final String password = "java";//FMTmxp13103
 	private final String db = "gimnasio";
-	private final String timeZone = "serverTimezone=UTC";
 	
-	private ConnectionPool() 
+	private ConnectionPool()
 	{
 		basicDataSource = new BasicDataSource();
 		
 		basicDataSource.setDriverClassName(driver);
 		basicDataSource.setUsername(user);
 		basicDataSource.setPassword(password);
-		basicDataSource.setUrl("jdbc:mysql://"+host+":"+port+"/"+db+"?"+timeZone);
+		basicDataSource.setUrl("jdbc:mysql://"+host+":"+port+"/"+db);
 		
 		basicDataSource.setMinIdle(3);
-		basicDataSource.setMaxIdle(10);;
-		basicDataSource.setMaxTotal(30);;
-		basicDataSource.setMaxWaitMillis(-1);;
+		basicDataSource.setMaxIdle(10);
+		basicDataSource.setMaxTotal(30);
+		basicDataSource.setMaxWaitMillis(-1);
 	}
 	
 	public static ConnectionPool getInstance() 
@@ -43,31 +42,33 @@ public class ConnectionPool
 		return dataSource;
 	}
 	
-	public Connection getConnection() 
+	public Connection getConnection() throws Exception 
 	{
-		Connection conn = null;
-		
 		try 
 		{
-			conn = this.basicDataSource.getConnection();
-		} 
+			return this.basicDataSource.getConnection();
+		}
 		catch (SQLException e) 
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al abrir la conexión", e);
+			throw excepcionManejada;
 		}
-
-		return conn;
 	}
 	
-	public void closeConnection(Connection conn) 
+	public void closeConnection(Connection conn) throws Exception 
 	{
 		try
 		{
-			conn.close();
+			if(conn!=null) 
+			{
+				conn.close();
+				conn = null;
+			}
 		}
 		catch(SQLException e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al cerrar la conexión", e);
+			throw excepcionManejada;
 		}
 	}
 }

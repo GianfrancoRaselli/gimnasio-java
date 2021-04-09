@@ -7,33 +7,30 @@ import Entidades.*;
 
 public class RutinaLogic 
 {	
-	public boolean AgregarRutina(Rutina r)
-	{
-		AdaptadorRutina rutinaAdapter = new AdaptadorRutina();
-		return rutinaAdapter.Insert(r);
-	}	
+	private AdaptadorRutina rutinaAdapter;
 	
-	public Rutina BuscarRutina(Rutina r)
+	public RutinaLogic()
 	{
-		AdaptadorRutina rutinaAdapter = new AdaptadorRutina();
-		return rutinaAdapter.BuscarRutina(r);
+		rutinaAdapter = new AdaptadorRutina();
 	}
 	
-	public boolean AgregarEjercicios(Rutina r)
+	public void AgregarRutina(Rutina r) throws Exception
 	{
-		AdaptadorRutina rutinaAdapter = new AdaptadorRutina();
-		return rutinaAdapter.InsertEjercicios(r);
+		rutinaAdapter.Insert(r);
 	}	
 	
-	public Rutina BuscarUltimaRutinaDelUsuario(Usuario userSesion)
+	public Rutina BuscarRutina(Rutina r) throws Exception
 	{
-		AdaptadorRutina rutinaAdapter = new AdaptadorRutina();
+		return rutinaAdapter.BuscarRutina(r);
+	}	
+	
+	public Rutina BuscarUltimaRutinaDelUsuario(Usuario userSesion) throws Exception
+	{
 		return rutinaAdapter.BuscarUltimaRutinaDelUsuario(userSesion);
 	}	
 	
-	public Collection<Rutina> BuscarRutinasDelUsuario(Usuario userSesion)
+	public Collection<Rutina> BuscarRutinasDelUsuario(Usuario userSesion) throws Exception
 	{
-		AdaptadorRutina rutinaAdapter = new AdaptadorRutina();
 		return rutinaAdapter.BuscarRutinasDelUsuario(userSesion);
 	}	
 }

@@ -1,6 +1,6 @@
 package Entidades;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 public class Inscripcion 
 {
@@ -25,7 +25,8 @@ public class Inscripcion
 	}
 	private Persona persona;
 	private ClasePersonalizada clasePersonalizada;
-	private Date fechaHoraInscripcion;
+	private Timestamp fechaHoraInscripcion;
+	private String fechaHoraInscripcionString;
 	private Estados estado;
 	@Override
 	public String toString() {
@@ -44,10 +45,10 @@ public class Inscripcion
 	public void setClasePersonalizada(ClasePersonalizada clasePersonalizada) {
 		this.clasePersonalizada = clasePersonalizada;
 	}
-	public Date getFechaHoraInscripcion() {
+	public Timestamp getFechaHoraInscripcion() {
 		return fechaHoraInscripcion;
 	}
-	public void setFechaHoraInscripcion(Date fechaHoraInscripcion) {
+	public void setFechaHoraInscripcion(Timestamp fechaHoraInscripcion) {
 		this.fechaHoraInscripcion = fechaHoraInscripcion;
 	}
 	public Estados getEstado() {
@@ -90,5 +91,11 @@ public class Inscripcion
 		} else if (!persona.equals(other.persona))
 			return false;
 		return true;
+	}
+	public String getFechaHoraInscripcionString() {
+		return fechaHoraInscripcionString;
+	}
+	public void setFechaHoraInscripcionString(String fechaHoraInscripcionString) {
+		this.fechaHoraInscripcionString = fechaHoraInscripcionString;
 	}
 }

@@ -3,17 +3,15 @@ package BaseDeDatos;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 
 import Entidades.*;
+import Util.FormateoHora;
 
 public class AdaptadorRutina 
 {
-	public Rutina BuscarUltimaRutinaDelUsuario(Usuario userSesion)
+	public Rutina BuscarUltimaRutinaDelUsuario(Usuario userSesion) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -24,11 +22,11 @@ public class AdaptadorRutina
 		ResultSet rs = null;
 		Rutina r = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, userSesion.getPersona().getDni());
 			statement.setString(2, userSesion.getPersona().getDni());
@@ -39,12 +37,10 @@ public class AdaptadorRutina
 			{
 				r = new Rutina();
 				Persona p = new Persona();
-				
 				p.setDni(rs.getString("dni"));
 				r.setPersona(p);
 				
-				r.setFecha(rs.getDate("fecha_hora"));
-				r.setHora(rs.getTime("fecha_hora"));
+				r.setFechaHora(rs.getTimestamp("fecha_hora"));
 				
 				for(int i=1; i<=7; i++)
 				{
@@ -77,42 +73,66 @@ public class AdaptadorRutina
 		}
 		catch(Exception e)
 		{
-			r = null;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar última rutina", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return r;
 	}
 	
-	public Rutina BuscarRutina(Rutina r)
+	public Collection<Rutina> BuscarRutinasDelUsuario(Usuario userSesion) throws Exception
+	{
+		ConnectionPool connectionPool = null;
+		Connection conn = null;
+		String instruccion = "SELECT * FROM rutinas WHERE dni=? ORDER BY fecha_hora DESC";
+		PreparedStatement statement = null;
+		ResultSet rs = null;
+		Collection<Rutina> rutinas = new ArrayList<Rutina>();
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
+		try
+		{	
+			statement = conn.prepareStatement(instruccion);
+			statement.setString(1, userSesion.getPersona().getDni());
+			
+			rs = statement.executeQuery();
+			
+			if(rs!=null)
+			{
+				while(rs.next())
+				{
+					Rutina r = new Rutina();
+					
+					r.setFechaHora(rs.getTimestamp("fecha_hora"));
+					
+					rutinas.add(r);
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			Exception excepcionManejada = new Exception("Error al buscar rutinas del usuario", e);
+			throw excepcionManejada;
+		}
+		finally
+		{
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
+		}
+		
+		return rutinas;
+	}
+	
+	public Rutina BuscarRutina(Rutina r) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -120,14 +140,14 @@ public class AdaptadorRutina
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, r.getPersona().getDni());
-			statement.setString(2, r.getStringFechaHora());
+			statement.setString(2, r.getFechaHoraString());
 			
 			rs = statement.executeQuery();
 			
@@ -139,8 +159,7 @@ public class AdaptadorRutina
 				p.setDni(rs.getString("dni"));
 				r.setPersona(p);
 				
-				r.setFecha(rs.getDate("fecha_hora"));
-				r.setHora(rs.getTime("fecha_hora"));
+				r.setFechaHora(rs.getTimestamp("fecha_hora"));
 				
 				for(int i=1; i<=7; i++)
 				{
@@ -173,157 +192,158 @@ public class AdaptadorRutina
 		}
 		catch(Exception e)
 		{
-			r = null;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar rutina", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return r;
 	}
 	
-	public boolean Insert(Rutina r)
+	public Collection<Ejercicio> BuscarEjercicios(Rutina r, int nroDia) throws Exception
+	{
+		ConnectionPool connectionPool = null;
+		Connection conn = null;
+		String instruccion = "SELECT * FROM ejercicios WHERE dni=? AND fecha_hora=? AND nro_dia=?";
+		PreparedStatement statement = null;
+		ResultSet rs = null;
+		Collection<Ejercicio> ejercicios = new ArrayList<Ejercicio>();
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
+		try
+		{	
+			statement = conn.prepareStatement(instruccion);
+			statement.setString(1, r.getPersona().getDni());
+			statement.setString(2, FormateoHora.getFechaHoraEnFormatoBDD(r.getFechaHora()));
+			statement.setInt(3, nroDia);
+			
+			rs = statement.executeQuery();
+			
+			if(rs!=null)
+			{
+				while(rs.next())
+				{
+					Ejercicio e = new Ejercicio();
+					
+					AdaptadorTipoEjercicio tipoEjercicioAdapter = new AdaptadorTipoEjercicio();
+					TipoEjercicio te = new TipoEjercicio();
+					te.setCodTipoEjercicio(rs.getInt("cod_tipo_ejercicio"));
+					e.setTipoEjercicio(tipoEjercicioAdapter.GetOne(te));
+					
+					switch(rs.getInt("tipo"))
+					{
+						case 1:
+							e.setTipo(Ejercicio.Tipos.Repeticion);
+							break;
+						case 2:
+							e.setTipo(Ejercicio.Tipos.Tiempo);
+							break;
+					}
+					
+					switch(rs.getInt("nro_dia"))
+					{
+						case 1:
+							e.setNroDia(Ejercicio.NroDias.Primero);
+							break;
+						case 2:
+							e.setNroDia(Ejercicio.NroDias.Segundo);
+							break;
+						case 3:
+							e.setNroDia(Ejercicio.NroDias.Tercero);
+							break;
+						case 4:
+							e.setNroDia(Ejercicio.NroDias.Cuarto);
+							break;
+						case 5:
+							e.setNroDia(Ejercicio.NroDias.Quinto);
+							break;
+						case 6:
+							e.setNroDia(Ejercicio.NroDias.Sexto);
+							break;
+						case 7:
+							e.setNroDia(Ejercicio.NroDias.Septimo);
+							break;
+					}
+					
+					e.setOrden(rs.getInt("orden"));
+					e.setSeries(rs.getString("series"));
+					e.setRepeticiones(rs.getString("repeticiones"));
+					e.setPesos(rs.getString("pesos"));
+					e.setTiempo(rs.getString("tiempo"));
+					
+					ejercicios.add(e);
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			Exception excepcionManejada = new Exception("Error al buscar ejercicios", e);
+			throw excepcionManejada;
+		}
+		finally
+		{
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
+		}
+		
+		return ejercicios;
+	}
+	
+	public void Insert(Rutina r) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "INSERT INTO rutinas (dni, fecha_hora) VALUES (?, ?)";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
+		{	
+			conn.setAutoCommit(false);
 			
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, r.getPersona().getDni());
-
-			String anio = String.valueOf(r.getFecha().getYear()+1900); 
-			
-			String mes;
-			if(r.getFecha().getMonth()+1 < 10)
-			{
-				mes = "0" + String.valueOf(r.getFecha().getMonth()+1);
-			}
-			else
-			{
-				mes = String.valueOf(r.getFecha().getMonth()+1);
-			}
-			
-			String dia;
-			if(r.getFecha().getDate() < 10)
-			{
-				dia = "0" + String.valueOf(r.getFecha().getDate());
-			}
-			else
-			{
-				dia = String.valueOf(r.getFecha().getDate());
-			}
-			
-			String hora;
-			if(r.getFecha().getHours() < 10)
-			{
-				hora = "0" + String.valueOf(r.getFecha().getHours());
-			}
-			else
-			{
-				hora = String.valueOf(r.getFecha().getHours());
-			}
-			
-			String min;
-			if(r.getFecha().getMinutes() < 10)
-			{
-				min = "0" + String.valueOf(r.getFecha().getMinutes());
-			}
-			else
-			{
-				min = String.valueOf(r.getFecha().getMinutes());
-			}
-			
-			String seg;
-			if(r.getFecha().getSeconds() < 10)
-			{
-				seg = "0" + String.valueOf(r.getFecha().getSeconds());
-			}
-			else
-			{
-				seg = String.valueOf(r.getFecha().getSeconds());
-			}
-			
-			statement.setString(2, anio + mes + dia + hora + min + seg);
+			statement.setString(2, r.getFechaHoraString());
 			
 			statement.executeUpdate();
+			
+			this.InsertEjercicios(conn, r);
+			
+			conn.commit();
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			conn.rollback();
+			
+			Exception excepcionManejada = new Exception("Error al agregar rutina", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 	
-	public boolean InsertEjercicios(Rutina r)
+	public void InsertEjercicios(Connection conn, Rutina r) throws Exception
 	{
-		ConnectionPool connectionPool = null;
-		Connection conn = null;
 		String instruccion = "INSERT INTO ejercicios (dni, fecha_hora, nro_dia, orden, cod_tipo_ejercicio, tipo, "
 				+ "series, repeticiones, pesos, tiempo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement statement = null;
 		ArrayList<Ejercicio> ejercicios = null;
-		boolean devolucion = true;
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			
 			for(int i=0; i<=7; i++)
@@ -358,60 +378,7 @@ public class AdaptadorRutina
 					for(Ejercicio ejercicio: ejercicios)
 					{
 						statement.setString(1, r.getPersona().getDni());
-			
-						String anio = String.valueOf(r.getFecha().getYear()+1900); 
-						
-						String mes;
-						if(r.getFecha().getMonth()+1 < 10)
-						{
-							mes = "0" + String.valueOf(r.getFecha().getMonth()+1);
-						}
-						else
-						{
-							mes = String.valueOf(r.getFecha().getMonth()+1);
-						}
-						
-						String dia;
-						if(r.getFecha().getDate() < 10)
-						{
-							dia = "0" + String.valueOf(r.getFecha().getDate());
-						}
-						else
-						{
-							dia = String.valueOf(r.getFecha().getDate());
-						}
-						
-						String hora;
-						if(r.getFecha().getHours() < 10)
-						{
-							hora = "0" + String.valueOf(r.getFecha().getHours());
-						}
-						else
-						{
-							hora = String.valueOf(r.getFecha().getHours());
-						}
-						
-						String min;
-						if(r.getFecha().getMinutes() < 10)
-						{
-							min = "0" + String.valueOf(r.getFecha().getMinutes());
-						}
-						else
-						{
-							min = String.valueOf(r.getFecha().getMinutes());
-						}
-						
-						String seg;
-						if(r.getFecha().getSeconds() < 10)
-						{
-							seg = "0" + String.valueOf(r.getFecha().getSeconds());
-						}
-						else
-						{
-							seg = String.valueOf(r.getFecha().getSeconds());
-						}
-						
-						statement.setString(2, anio + mes + dia + hora + min + seg);
+						statement.setString(2, r.getFechaHoraString());
 						
 						switch(ejercicio.getNroDia())
 						{
@@ -463,270 +430,8 @@ public class AdaptadorRutina
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al agregar ejercicios", e);
+			throw excepcionManejada;
 		}
-		finally
-		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
-		
-		return devolucion;
-	}
-	
-	public Collection<Ejercicio> BuscarEjercicios(Rutina r, int nroDia)
-	{
-		ConnectionPool connectionPool = null;
-		Connection conn = null;
-		String instruccion = "SELECT * FROM ejercicios WHERE dni=? AND fecha_hora=? AND nro_dia=?";
-		PreparedStatement statement = null;
-		ResultSet rs = null;
-		Collection<Ejercicio> ejercicios = new ArrayList<Ejercicio>();
-		
-		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
-			statement = conn.prepareStatement(instruccion);
-			statement.setString(1, r.getPersona().getDni());
-
-			String anio = String.valueOf(r.getFecha().getYear()+1900); 
-			
-			String mes;
-			if(r.getFecha().getMonth()+1 < 10)
-			{
-				mes = "0" + String.valueOf(r.getFecha().getMonth()+1);
-			}
-			else
-			{
-				mes = String.valueOf(r.getFecha().getMonth()+1);
-			}
-			
-			String dia;
-			if(r.getFecha().getDate() < 10)
-			{
-				dia = "0" + String.valueOf(r.getFecha().getDate());
-			}
-			else
-			{
-				dia = String.valueOf(r.getFecha().getDate());
-			}
-			
-			String hora;
-			if(r.getHora().getHours()+3 < 10)
-			{
-				hora = "0" + String.valueOf(r.getHora().getHours()+3);
-			}
-			else
-			{
-				hora = String.valueOf(r.getHora().getHours()+3);
-			}
-			
-			String min;
-			if(r.getHora().getMinutes() < 10)
-			{
-				min = "0" + String.valueOf(r.getHora().getMinutes());
-			}
-			else
-			{
-				min = String.valueOf(r.getHora().getMinutes());
-			}
-			
-			String seg;
-			if(r.getHora().getSeconds() < 10)
-			{
-				seg = "0" + String.valueOf(r.getHora().getSeconds());
-			}
-			else
-			{
-				seg = String.valueOf(r.getHora().getSeconds());
-			}
-			
-			statement.setString(2, anio + mes + dia + hora + min + seg);			
-			statement.setInt(3, nroDia);
-			
-			rs = statement.executeQuery();
-			
-			if(rs!=null)
-			{
-				while(rs.next())
-				{
-					Ejercicio e = new Ejercicio();
-					
-					AdaptadorTipoEjercicio tipoEjercicioAdapter = new AdaptadorTipoEjercicio();
-					TipoEjercicio te = new TipoEjercicio();
-					te.setCodTipoEjercicio(rs.getInt("cod_tipo_ejercicio"));
-					e.setTipoEjercicio(tipoEjercicioAdapter.GetOne(te));
-					
-					switch(rs.getInt("tipo"))
-					{
-						case 1:
-							e.setTipo(Ejercicio.Tipos.Repeticion);
-							break;
-						case 2:
-							e.setTipo(Ejercicio.Tipos.Tiempo);
-							break;
-						default:
-							e.setTipo(null);
-							break;
-					}
-					
-					switch(rs.getInt("nro_dia"))
-					{
-						case 1:
-							e.setNroDia(Ejercicio.NroDias.Primero);
-							break;
-						case 2:
-							e.setNroDia(Ejercicio.NroDias.Segundo);
-							break;
-						case 3:
-							e.setNroDia(Ejercicio.NroDias.Tercero);
-							break;
-						case 4:
-							e.setNroDia(Ejercicio.NroDias.Cuarto);
-							break;
-						case 5:
-							e.setNroDia(Ejercicio.NroDias.Quinto);
-							break;
-						case 6:
-							e.setNroDia(Ejercicio.NroDias.Sexto);
-							break;
-						case 7:
-							e.setNroDia(Ejercicio.NroDias.Septimo);
-							break;
-						default:
-							e.setNroDia(null);
-							break;
-					}
-					
-					e.setOrden(rs.getInt("orden"));
-					e.setSeries(rs.getString("series"));
-					e.setRepeticiones(rs.getString("repeticiones"));
-					e.setPesos(rs.getString("pesos"));
-					e.setTiempo(rs.getString("tiempo"));
-					
-					ejercicios.add(e);
-				}
-			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
-		
-		return ejercicios;
-	}
-	
-	public Collection<Rutina> BuscarRutinasDelUsuario(Usuario userSesion)
-	{
-		ConnectionPool connectionPool = null;
-		Connection conn = null;
-		String instruccion = "SELECT * FROM rutinas WHERE dni=? ORDER BY fecha_hora DESC";
-		PreparedStatement statement = null;
-		ResultSet rs = null;
-		Collection<Rutina> rutinas = new ArrayList<Rutina>();
-		
-		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
-			statement = conn.prepareStatement(instruccion);
-			statement.setString(1, userSesion.getPersona().getDni());
-			
-			rs = statement.executeQuery();
-			
-			if(rs!=null)
-			{
-				while(rs.next())
-				{
-					Rutina r = new Rutina();
-					
-					r.setFecha(rs.getDate("fecha_hora"));
-					r.setHora(rs.getTime("fecha_hora"));
-					
-					rutinas.add(r);
-				}
-			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
-		
-		return rutinas;
 	}
 }

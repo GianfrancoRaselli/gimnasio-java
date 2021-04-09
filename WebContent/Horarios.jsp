@@ -1,9 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8" session="true"%>
 
-<%@ page import="Entidades.*, Controlador.*, java.util.*"%>
+<%@ page import="Entidades.*, Controlador.*, java.util.*, Servlets.*, Util.*"%>
 
 	<% 
+	try
+	{
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response.setHeader("Pragma", "no-cache");
 		response.setHeader("Expires", "0");
@@ -20,17 +22,19 @@
 	%>
 	
 	<% 
-		ArrayList<Horario> horarios = new ArrayList<Horario>();	
-	
-		if((request.getAttribute("horarios") == null) && (request.getAttribute("horario") == null))
-		{
-			ControladorHorario ch = new ControladorHorario();
-			ch.BuscarHorarios(request, response);
-		}
+		ArrayList<Horario> horarios = new ArrayList<Horario>();
 		
 		if(request.getAttribute("horario") == null)
 		{
-			horarios = (ArrayList<Horario>) request.getAttribute("horarios");
+			if(request.getAttribute("horarios") == null)
+			{
+				ControladorHorario ch = new ControladorHorario();
+				horarios = ch.BuscarHorarios();
+			}
+			else
+			{
+				horarios = (ArrayList<Horario>) request.getAttribute("horarios");
+			}
 		}
 		else
 		{
@@ -39,15 +43,11 @@
 		
 		
 		ControladorSucursal cs = new ControladorSucursal();
-		cs.BuscarSucursales(request, response);
-		
-		ArrayList<Sucursal> sucursales = (ArrayList<Sucursal>) request.getAttribute("sucursales");
+		ArrayList<Sucursal> sucursales = cs.BuscarSucursales();
 		
 		
 		ControladorDia cd = new ControladorDia();
-		cd.BuscarDias(request, response);
-		
-		ArrayList<Dia> dias = (ArrayList<Dia>) request.getAttribute("dias");
+		ArrayList<Dia> dias = cd.BuscarDias();
 	%>
 	
 <!DOCTYPE html>
@@ -59,56 +59,66 @@
 <meta name="keywords" content="">
 <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maxium-scale=1.0, minimum-scale=1.0">
 <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+<script src="https://kit.fontawesome.com/5520773c7b.js" crossorigin="anonymous"></script>
 <title>Horarios</title>
 
 <style type="text/css">
-	@media (max-width: 991px){
-		
+	.modal{
+		display: none;
+		position: fixed;
+		width: 40%;
+		height: auto;
+		z-index: 1;
+		top: auto;
+		bottom: 0;
+		left: auto;
+		right: 0;
 	}
 	
 	.modalContainer {
-			display: none; 
-			position: absolute; 
-			z-index: 1;		
-			padding-top: 1%;
-			left: 0;
-			top: 0;
-			width: 100%;
-			height: 100%; 
-			overflow: hidden; 
-			background-color: rgb(0,0,0);
-			background-color: rgba(0,0,0,0.4);
-		}
+		display: none; 
+		position: absolute; 
+		z-index: 1;		
+		padding-top: 70px;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%; 
+		overflow: hidden; 
+		background-color: rgb(0,0,0);
+		background-color: rgba(0,0,0,0.4);
+	}
 
-		.modalContainer .modal-content {
-			background-color: #fefefe;
-			margin: auto;
-			padding: 1.5%;
-			border: 1px solid lightgray;
-			width: 50%;
-		}
+	.modalContainer .modal-content {
+		background-color: #fefefe;
+		margin: auto;
+		padding: 1.5%;
+		border: 1px solid lightgray;
+		width: 50%;
+	}
 		
-		#modalExito{
-			display: none;
-		}
+	#modalExito{
+		display: none;
+	}
 		
-		#modalError{
-			display: none;
-		}
+	#modalError{
+		display: none;
+	}
 		
-		#modalAdvertencia{
-			display: none;
-		}
+	#modalAdvertencia{
+		display: none;
+	}
 </style>
 	
 </head>
+
 <body style="background-color:#E1E1E1; padding-right: 1%; padding-left: 1%;"> 
 
 <%
 	String modal = (String)request.getAttribute("modal");
 %>
 
-<div class="alert alert-success alert-dismissible fade show" role="alert" id="modalExito">
+<div class="alert alert-success alert-dismissible fade show modal" role="alert" id="modalExito" style="background-color: #83FF83; color: black;">
   			<%
 				if(modal != null)
 				{
@@ -131,7 +141,7 @@
   </button>
 </div>
 
-<div class="alert alert-danger alert-dismissible fade show" role="alert" id="modalError">
+<div class="alert alert-danger alert-dismissible fade show modal" role="alert" id="modalError">
   			<%
 				if(modal != null)
 				{
@@ -154,7 +164,7 @@
   </button>
 </div>
 
-<div class="alert alert-warning alert-dismissible fade show" role="alert" id="modalAdvertencia">
+<div class="alert alert-warning alert-dismissible fade show modal" role="alert" id="modalAdvertencia">
   			<%
 				if(modal != null)
 				{
@@ -175,7 +185,7 @@
 		<div class="modal-content" id="modalContentAgregar">
 			<h2 style="margin-bottom: 3%; text-align: center;">Agregar horario</h2>
 			<div>
-				<form action="ControladorHorario" method="post" name="personas">
+				<form action="ServletHorario" method="post" name="personas">
 					<input type="hidden" name="instruccion" value="agregar_horario">
 						
 						<div class="row" style="margin-top: 2%;">
@@ -216,7 +226,7 @@
 							    	<%
 							    		for(int i = 0; i < 24; i++)
 										{%>
-								  			<option value="<%=i%>"><%=i%></option>
+								  			<option value="<%if(i<10){out.print("0"+i);}else{out.print(i);}%>"><%if(i<10){out.print("0"+i);}else{out.print(i);}%></option>
 										<%} 
 									%>
 								</select>
@@ -227,7 +237,7 @@
 							    	<%
 							    		for(int i = 0; i <= 45; i = i + 15)
 										{%>
-											<option value="<%=i%>"><%=i%></option>
+											<option value="<%if(i<10){out.print("0"+i);}else{out.print(i);}%>"><%if(i<10){out.print("0"+i);}else{out.print(i);}%></option>
 										<%} 
 									%>
 								</select>
@@ -242,7 +252,7 @@
 							    	<%
 							    		for(int i = 0; i < 24; i++)
 										{%>
-								  			<option value="<%=i%>"><%=i%></option>
+								  			<option value="<%if(i<10){out.print("0"+i);}else{out.print(i);}%>"><%if(i<10){out.print("0"+i);}else{out.print(i);}%></option>
 										<%} 
 									%>
 								</select>
@@ -253,7 +263,7 @@
 							    	<%
 							    		for(int i = 0; i <= 45; i = i + 15)
 										{%>
-								  			<option value="<%=i%>"><%=i%></option>
+								  			<option value="<%if(i<10){out.print("0"+i);}else{out.print(i);}%>"><%if(i<10){out.print("0"+i);}else{out.print(i);}%></option>
 										<%} 
 									%>
 								</select>
@@ -269,8 +279,10 @@
 		</div>
 	</div>
 	
+	<%if(userSesion.getNivelUsuario().getDescripcion().equals("administrador"))
+	{%>
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		  <a class="navbar-brand">Administrador</a>
+		  <a class="navbar-brand" href="Inicio.jsp">Gimnasio</a>
 		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
 		    <span class="navbar-toggler-icon"></span>
 		  </button>
@@ -287,22 +299,22 @@
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Cuotas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="PagarCuota.jsp">Pagar cuota</a> 
+					<a class="dropdown-item" href="BuscarPersona.jsp">Pagar cuotas</a> 
+					<a class="dropdown-item" href="MisCuotas.jsp">Mis cuotas</a> 
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rutinas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="RegistrarRutina.jsp">Registrar nueva rutina</a> 
-					<a class="dropdown-item" href="Rutinas.jsp">Ver rutinas</a> 
+					<a class="dropdown-item" href="BuscarPersonaDeRutina.jsp">Registrar nueva rutina</a> 
+					<a class="dropdown-item" href="MisRutinas.jsp">Mis rutinas</a> 
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Clases personalizadas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="">Ver todas las clases personalizadas</a> 
-					<a class="dropdown-item" href="">Agregar nueva clase personalizada</a>
-					<a class="dropdown-item" href="">Registrarse a una clase personalizada</a> 
+		      		<a class="dropdown-item" href="Asistencias.jsp">Registrar asistencias</a>
+					<a class="dropdown-item" href="ClasesPersonalizadas.jsp">Ver clases personalizadas</a>
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
@@ -316,30 +328,78 @@
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Entrada</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-		      		<a class="dropdown-item" href="">Validar entrada</a> 
+		      		<a class="dropdown-item" href="ValidarEntrada.jsp">Validar entrada</a> 
 		        </div>
 		      </li>
 		    </ul>
+		    <ul class="navbar-nav user">
+			 	<li class="nav-item dropdown">
+				  	<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    	<i class="fas fa-user"></i>&nbsp;<%= userSesion.getNombreUsuario() %>
+				    </a>
+				    <div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
+				      	<a class="dropdown-item" href="Perfil.jsp"><i class="far fa-id-card"></i>&nbsp;Perfil</a>
+						<form action="ServletSesion" method="post" name="Cerrar">
+							<input type="hidden" name="instruccion" value="cerrar_sesion">
+							<button style="color: red;" class="dropdown-item" type="submit"><i class="fas fa-sign-out-alt"></i>&nbsp;Cerrar sesión</button>
+						</form> 
+				  	</div>
+				</li>
+			</ul>
 		  </div>
-		  <div style="margin-right: auto">
-			  <div class="collapse navbar-collapse" id="navbarNavDropdown">
-			  	<ul class="navbar-nav">
-			  		<li class="nav-item dropdown">
-				    	<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				       		<%= userSesion.getNombreUsuario() %>
-				        </a>
-				       	<div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
-				        	<a class="dropdown-item" href="Perfil.jsp">Perfil</a>
-							<form action="ControladorSesion" method="post" name="Cerrar">
-								<input type="hidden" name="instruccion" value="cerrar_sesion">
-								<button style="color: red;" class="dropdown-item" type="submit">Cerrar sesión</button>
-							</form> 
-				   		</div>
-					</li>
-			  	</ul>
-			  </div>
-			</div>
 		</nav>
+		<%}
+		else if(userSesion.getNivelUsuario().getDescripcion().equals("usuario"))
+		{%>
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+		  <a class="navbar-brand" href="Inicio.jsp">Gimnasio</a>
+		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+		    <span class="navbar-toggler-icon"></span>
+		  </button>
+		  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+		    <ul class="navbar-nav">
+		      <li class="nav-item dropdown">
+		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Cuotas</a>
+		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="MisCuotas.jsp">Mis cuotas</a> 
+		        </div>
+		      </li>
+		      <li class="nav-item dropdown">
+		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rutinas</a>
+		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="MisRutinas.jsp">Mis rutinas</a> 
+		        </div>
+		      </li>
+		      <li class="nav-item dropdown">
+		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Clases personalizadas</a>
+		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="ClasesPersonalizadas.jsp">Ver clases personalizadas</a>
+		        </div>
+		      </li>
+		      <li class="nav-item dropdown">
+		        <a style="color: orange" class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sucursales</a>
+		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+		      		<a style="background-color: orange" class="dropdown-item" href="Horarios.jsp">Horarios sucursales</a>  
+		        </div>
+		      </li>
+		    </ul>
+		    <ul class="navbar-nav user">
+			 	<li class="nav-item dropdown">
+				  	<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    	<i class="fas fa-user"></i>&nbsp;<%=userSesion.getNombreUsuario()%>
+				    </a>
+				    <div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
+				      	<a class="dropdown-item" href="Perfil.jsp"><i class="far fa-id-card"></i>&nbsp;Perfil</a>
+						<form action="ServletSesion" method="post" name="Cerrar">
+							<input type="hidden" name="instruccion" value="cerrar_sesion">
+							<button style="color: red;" class="dropdown-item" type="submit"><i class="fas fa-sign-out-alt"></i>&nbsp;Cerrar sesión</button>
+						</form> 
+				  	</div>
+				</li>
+			</ul>
+		  </div>
+		</nav>
+		<%}%>
 			
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
 			<h2>Horarios</h2>&nbsp;
@@ -348,7 +408,7 @@
 				<div style="background-color: #E3FBE3;"><button class="btn btn-outline-success" onclick="abrirAgregar()" style="margin-top: auto; margin-bottom: auto;">Agregar horario</button></div>
 			<%}%>
 			<div style="margin-left: auto">
-				<form class="form-inline my-2 my-lg-0" action="ControladorHorario" method="post" name="busqueda_por_nombre_sucursal">
+				<form class="form-inline my-2 my-lg-0" action="ServletHorario" method="post" name="busqueda_por_nombre_sucursal">
 					<input type="hidden" name="instruccion" value="buscar_por_nombre_sucursal">
 			     	<input class="form-control mr-sm-2" type="search" placeholder="Buscar por sucursal" aria-label="Search" name="nombre_sucursal">
 			     	<div style="background-color: #E3FBE3;"><button class="btn btn-outline-success my-2 my-sm-0" type="submit">Buscar</button></div>
@@ -368,18 +428,20 @@
 					{
 						if(userSesion.getNivelUsuario().getDescripcion().equals("administrador"))
 						{%>
-							<form action="ControladorHorario" method="post" name="horario">
+							<form action="ServletHorario" method="post" name="horario">
 							
 							<input type="hidden" name="instruccion" value="editar_horario">
 							<input type="hidden" name="nombre_sucursal" value="<%=horario.getSucursal().getNombreSucursal()%>">
 							<input type="hidden" name="nro_dia" value="<%=horario.getDia().getNroDia()%>">
-							<input type="hidden" name="id_hora_desde" value="<%=horario.getHoraDesde().getHours()+3%>">
-							<input type="hidden" name="id_minuto_desde" value="<%=horario.getHoraDesde().getMinutes()%>">
+							<input type="hidden" name="id_hora_desde" value="<%=FormateoHora.getHoraEnFormatoBDD(horario.getHoraDesde())%>">
 							
 							<%if(!horario.getSucursal().getNombreSucursal().equals(sucursalActual) && sucursalActual.equals(""))
 							{%>
 								<div class="card">
-								  <h5 class="card-header"><%=horario.getSucursal().getNombreSucursal() %></h5>
+								  <h5 class="card-header"><%out.print(horario.getSucursal().getNombreSucursal()+" - "+
+										  							  horario.getSucursal().getDireccion()+" - "+
+										  							  horario.getSucursal().getCiudad().getDescripcion()+" - "+
+										  							  horario.getSucursal().getCiudad().getProvincia().getNombreProvincia());%></h5>
 								  <div class="card-body">
 							<%}
 							
@@ -388,7 +450,10 @@
 								</div>
 								</div>
 								<div class="card" style="margin-top: 1%;">
-								  <h5 class="card-header"><%=horario.getSucursal().getNombreSucursal() %></h5>
+								  <h5 class="card-header"><%out.print(horario.getSucursal().getNombreSucursal()+" - "+
+										  							  horario.getSucursal().getDireccion()+" - "+
+										  							  horario.getSucursal().getCiudad().getDescripcion()+" - "+
+										  							  horario.getSucursal().getCiudad().getProvincia().getNombreProvincia());%></h5>
 								  <div class="card-body">
 							<%}
 							
@@ -413,8 +478,8 @@
 								    	<%
 								    		for(int i = 0; i < 24; i++)
 											{%>
-									  			<option value="<%=i%>"
-												<%if(horario.getHoraDesde().getHours()+3 == i){%>selected<%}%>><%=i%></option>
+									  			<option value="<%if(i<10){out.print("0"+i);}else{out.print(i);}%>"
+												<%if(FormateoHora.getHoraInt(horario.getHoraDesde()) == i){%>selected<%}%>><%if(i<10){out.print("0"+i);}else{out.print(i);}%></option>
 											<%} 
 										%>
 									</select>
@@ -425,8 +490,8 @@
 								    	<%
 								    		for(int i = 0; i <= 45; i = i + 15)
 											{%>
-									  			<option value="<%=i%>"
-												<%if(horario.getHoraDesde().getMinutes() == i){%>selected<%}%>><%=i%></option>
+									  			<option value="<%if(i<10){out.print("0"+i);}else{out.print(i);}%>"
+												<%if(FormateoHora.getMinutoInt(horario.getHoraDesde()) == i){%>selected<%}%>><%if(i<10){out.print("0"+i);}else{out.print(i);}%></option>
 											<%} 
 										%>
 									</select>
@@ -437,8 +502,8 @@
 								    	<%
 								    		for(int i = 0; i < 24; i++)
 											{%>
-									  			<option value="<%=i%>"
-												<%if(horario.getHoraHasta().getHours()+3 == i){%>selected<%}%>><%=i%></option>
+									  			<option value="<%if(i<10){out.print("0"+i);}else{out.print(i);}%>"
+												<%if(FormateoHora.getHoraInt(horario.getHoraHasta()) == i){%>selected<%}%>><%if(i<10){out.print("0"+i);}else{out.print(i);}%></option>
 											<%} 
 										%>
 									</select>
@@ -449,8 +514,8 @@
 								    	<%
 								    		for(int i = 0; i <= 45; i = i + 15)
 											{%>
-									  			<option value="<%=i%>"
-												<%if(horario.getHoraHasta().getMinutes() == i){%>selected<%}%>><%=i%></option>
+									  			<option value="<%if(i<10){out.print("0"+i);}else{out.print(i);}%>"
+												<%if(FormateoHora.getMinutoInt(horario.getHoraHasta()) == i){%>selected<%}%>><%if(i<10){out.print("0"+i);}else{out.print(i);}%></option>
 											<%} 
 										%>
 									</select>
@@ -470,7 +535,10 @@
 							if(!horario.getSucursal().getNombreSucursal().equals(sucursalActual) && sucursalActual.equals(""))
 							{%>
 								<div class="card">
-								  <h5 class="card-header"><%=horario.getSucursal().getNombreSucursal() %></h5>
+								  <h5 class="card-header"><%out.print(horario.getSucursal().getNombreSucursal()+" - "+
+										  							  horario.getSucursal().getDireccion()+" - "+
+										  							  horario.getSucursal().getCiudad().getDescripcion()+" - "+
+										  							  horario.getSucursal().getCiudad().getProvincia().getNombreProvincia());%></h5>
 								  <div class="card-body">
 							<%}
 							
@@ -479,7 +547,10 @@
 								</div>
 								</div>
 								<div class="card" style="margin-top: 1%;">
-								  <h5 class="card-header"><%=horario.getSucursal().getNombreSucursal() %></h5>
+								  <h5 class="card-header"><%out.print(horario.getSucursal().getNombreSucursal()+" - "+
+										  							  horario.getSucursal().getDireccion()+" - "+
+										  							  horario.getSucursal().getCiudad().getDescripcion()+" - "+
+										  							  horario.getSucursal().getCiudad().getProvincia().getNombreProvincia());%></h5>
 								  <div class="card-body">
 							<%}
 							
@@ -498,8 +569,8 @@
 							<%}%>
 							
 							<div class="card-text row" style="padding: 1%;">
-								<h6>-&nbsp;De&nbsp;<%if(horario.getHoraDesde().getHours()+3 < 10)%>0<%;%><%=horario.getHoraDesde().getHours()+3%>:<%if(horario.getHoraDesde().getMinutes() == 0){%>00<%}else{%><%=horario.getHoraDesde().getMinutes()%><%}%>&nbsp;hs.&nbsp;</h6>
-								<h6>a&nbsp;<%if(horario.getHoraHasta().getHours()+3 < 10)%>0<%;%><%=horario.getHoraHasta().getHours()+3%>:<%if(horario.getHoraHasta().getMinutes() == 0){%>00<%}else{%><%=horario.getHoraHasta().getMinutes()%><%}%>&nbsp;hs.&nbsp;</h6>
+								<h6><i class="fas fa-angle-right"></i>&nbsp;De&nbsp;<%=FormateoHora.getHora(horario.getHoraDesde())%>&nbsp;hs.&nbsp;</h6>
+								<h6>a&nbsp;<%=FormateoHora.getHora(horario.getHoraHasta())%>&nbsp;hs.</h6>
 							</div>
 					 	<%}
 					}%>
@@ -546,6 +617,10 @@
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 </body>
 </html>
-<%
-}
-%>
+<%}}
+catch(Exception e)
+{
+	RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+	request.setAttribute("exception", e);
+	dispatcher.forward(request, response);
+}%>

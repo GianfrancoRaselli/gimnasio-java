@@ -7,9 +7,15 @@ import Entidades.*;
 
 public class DiaLogic 
 {
-	public Collection<Dia> BuscarDias()
+	private AdaptadorDia diaAdapter;
+	
+	public DiaLogic()
 	{
-		AdaptadorDia diaAdapter = new AdaptadorDia();
+		diaAdapter = new AdaptadorDia();
+	}
+	
+	public Collection<Dia> BuscarDias() throws Exception
+	{
 		return diaAdapter.FindAll();
 	}
 }

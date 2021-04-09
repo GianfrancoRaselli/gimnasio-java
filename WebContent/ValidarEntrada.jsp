@@ -1,9 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8" session="true"%>
 
-<%@ page import="Entidades.*, Controlador.*, java.util.*"%>
+<%@ page import="Entidades.*, Controlador.*, java.util.*, Servlets.*"%>
 
 	<% 
+	try
+	{
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response.setHeader("Pragma", "no-cache");
 		response.setHeader("Expires", "0");
@@ -26,16 +28,14 @@
 			{
 	%>
 	
-	<% 
-		ControladorCuota cc = new ControladorCuota();
-		cc.ActualizarCuotas(request, response);
+	<%
+			ControladorCuota cc = new ControladorCuota();
+			cc.ActualizarCuotas();
 	%>
 	
 	<% 
 		ControladorSucursal cs = new ControladorSucursal();
-		cs.BuscarSucursales(request, response);
-
-		ArrayList<Sucursal> sucursales = (ArrayList<Sucursal>) request.getAttribute("sucursales");
+		ArrayList<Sucursal> sucursales = cs.BuscarSucursales();
 	%>
 	
 <!DOCTYPE html>
@@ -47,56 +47,65 @@
 <meta name="keywords" content="">
 <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maxium-scale=1.0, minimum-scale=1.0">
 <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+<script src="https://kit.fontawesome.com/5520773c7b.js" crossorigin="anonymous"></script>
 <title>Entrada</title>
 
 <style type="text/css">
-	@media (max-width: 991px){
-		
+	.modal{
+		display: none;
+		position: fixed;
+		width: 40%;
+		height: auto;
+		z-index: 1;
+		top: auto;
+		bottom: 0;
+		left: auto;
+		right: 0;
+	}
+
+	.modalContainer {
+		display: none; 
+		position: absolute; 
+		z-index: 1;		
+		padding-top: 1%;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%; 
+		overflow: hidden; 
+		background-color: rgb(0,0,0);
+		background-color: rgba(0,0,0,0.4);
+	}
+
+	.modalContainer .modal-content {
+		background-color: #fefefe;
+		margin: auto;
+		padding: 1.5%;
+		border: 1px solid lightgray;
+		width: 50%;
 	}
 	
-	.modalContainer {
-			display: none; 
-			position: absolute; 
-			z-index: 1;		
-			padding-top: 1%;
-			left: 0;
-			top: 0;
-			width: 100%;
-			height: 100%; 
-			overflow: hidden; 
-			background-color: rgb(0,0,0);
-			background-color: rgba(0,0,0,0.4);
-		}
-
-		.modalContainer .modal-content {
-			background-color: #fefefe;
-			margin: auto;
-			padding: 1.5%;
-			border: 1px solid lightgray;
-			width: 50%;
-		}
+	#modalExito{
+		display: none;
+	}
 		
-		#modalExito{
-			display: none;
-		}
+	#modalError{
+		display: none;
+	}
 		
-		#modalError{
-			display: none;
-		}
-		
-		#modalAdvertencia{
-			display: none;
-		}
+	#modalAdvertencia{
+		display: none;
+	}
 </style>
 	
 </head>
-<body style="background-color:#E1E1E1"> 
+<body style="background-color:#E1E1E1; padding-right: 1%; padding-left: 1%;"> 
 
 <%
 	String modal = (String)request.getAttribute("modal");
 %>
 
-<div class="alert alert-success alert-dismissible fade show" role="alert" id="modalExito">
+<div class="alert alert-success alert-dismissible fade show modal" role="alert" id="modalExito">
   			<%
 				if(modal != null)
 				{
@@ -113,7 +122,7 @@
   </button>
 </div>
 
-<div class="alert alert-danger alert-dismissible fade show" role="alert" id="modalError">
+<div class="alert alert-danger alert-dismissible fade show modal" role="alert" id="modalError">
   			<%
 				if(modal != null)
 				{
@@ -133,7 +142,7 @@
   </button>
 </div>
 
-<div class="alert alert-warning alert-dismissible fade show" role="alert" id="modalAdvertencia">
+<div class="alert alert-warning alert-dismissible fade show modal" role="alert" id="modalAdvertencia">
   			<%
 				if(modal != null)
 				{
@@ -151,7 +160,7 @@
 </div>
 	
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		  <a class="navbar-brand">Administrador</a>
+		  <a class="navbar-brand" href="Inicio.jsp">Gimnasio</a>
 		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
 		    <span class="navbar-toggler-icon"></span>
 		  </button>
@@ -168,22 +177,22 @@
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Cuotas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="PagarCuota.jsp">Pagar cuota</a> 
+					<a class="dropdown-item" href="BuscarPersona.jsp">Pagar cuotas</a> 
+					<a class="dropdown-item" href="MisCuotas.jsp">Mis cuotas</a> 
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rutinas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="RegistrarRutina.jsp">Registrar nueva rutina</a> 
-					<a class="dropdown-item" href="Rutinas.jsp">Ver rutinas</a> 
+					<a class="dropdown-item" href="BuscarPersonaDeRutina.jsp">Registrar nueva rutina</a> 
+					<a class="dropdown-item" href="MisRutinas.jsp">Mis rutinas</a> 
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Clases personalizadas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="">Ver todas las clases personalizadas</a> 
-					<a class="dropdown-item" href="">Agregar nueva clase personalizada</a>
-					<a class="dropdown-item" href="">Registrarse a una clase personalizada</a> 
+		      		<a class="dropdown-item" href="Asistencias.jsp">Registrar asistencias</a>
+					<a class="dropdown-item" href="ClasesPersonalizadas.jsp">Ver clases personalizadas</a>
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
@@ -201,32 +210,28 @@
 		        </div>
 		      </li>
 		    </ul>
+		    <ul class="navbar-nav user">
+			 	<li class="nav-item dropdown">
+				  	<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    	<i class="fas fa-user"></i>&nbsp;<%= userSesion.getNombreUsuario() %>
+				    </a>
+				    <div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
+				      	<a class="dropdown-item" href="Perfil.jsp"><i class="far fa-id-card"></i>&nbsp;Perfil</a>
+						<form action="ServletSesion" method="post" name="Cerrar">
+							<input type="hidden" name="instruccion" value="cerrar_sesion">
+							<button style="color: red;" class="dropdown-item" type="submit"><i class="fas fa-sign-out-alt"></i>&nbsp;Cerrar sesión</button>
+						</form> 
+				  	</div>
+				</li>
+			</ul>
 		  </div>
-		  <div style="margin-right: auto">
-			  <div class="collapse navbar-collapse" id="navbarNavDropdown">
-			  	<ul class="navbar-nav">
-			  		<li class="nav-item dropdown">
-				    	<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				       		<%= userSesion.getNombreUsuario() %>
-				        </a>
-				       	<div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
-				        	<a class="dropdown-item" href="Perfil.jsp">Perfil</a>
-							<form action="ControladorSesion" method="post" name="Cerrar">
-								<input type="hidden" name="instruccion" value="cerrar_sesion">
-								<button style="color: red;" class="dropdown-item" type="submit">Cerrar sesión</button>
-							</form> 
-				   		</div>
-					</li>
-			  	</ul>
-			  </div>
-			</div>
 		</nav>
 			
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
 			<h2>Validar entrada</h2>
 		</nav>
 		
-		<form action="ControladorEntrada" method="post" name="entrada" 
+		<form action="ServletEntrada" method="post" name="entrada" 
 		style="padding: 3%; border-radius: 15px; border: 2px solid black; background-color: #CFCFCF; margin-top: 1%;">
 		
 			<input type="hidden" name="instruccion" value="validar_entrada">
@@ -287,6 +292,10 @@
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 </body>
 </html>
-<%
-}}
-%>
+<%}}}
+catch(Exception e)
+{
+	RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+	request.setAttribute("exception", e);
+	dispatcher.forward(request, response);
+}%>

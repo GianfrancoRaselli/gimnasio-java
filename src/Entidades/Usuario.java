@@ -7,6 +7,7 @@ public class Usuario {
 	private String id;
 	private String nombreUsuario;
 	private String contrasenia;
+	private String contraseniaEncriptada;
 	private Persona persona;
 	private NivelUsuario nivelUsuario;
 	@Override
@@ -66,5 +67,11 @@ public class Usuario {
 	}
 	public void setId(String id) {
 		this.id = id;
+	}
+	public String getContraseniaEncriptada() {
+		return contraseniaEncriptada;
+	}
+	public void setContraseniaEncriptada(String contraseniaEncriptada) {
+		this.contraseniaEncriptada = contraseniaEncriptada;
 	}
 }

@@ -7,9 +7,15 @@ import Entidades.Ciudad;
 
 public class CiudadLogic 
 {
-	public Collection<Ciudad> BuscarCiudades()
+	private AdaptadorCiudad ciudadAdapter;
+	
+	public CiudadLogic()
 	{
-		AdaptadorCiudad ciudadAdapter = new AdaptadorCiudad();
+		ciudadAdapter = new AdaptadorCiudad();
+	}
+	
+	public Collection<Ciudad> BuscarCiudades() throws Exception
+	{
 		return ciudadAdapter.FindAll();
 	}
 }

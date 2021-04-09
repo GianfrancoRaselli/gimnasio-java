@@ -42,10 +42,10 @@ public class Ejercicio
 	private NroDias nroDia;
 	private int orden;
 	private Tipos tipo;
-	private String tiempo;
 	private String series;
 	private String repeticiones;
 	private String pesos;
+	private String tiempo;
 	public Rutina getRutina() {
 		return rutina;
 	}
@@ -70,41 +70,11 @@ public class Ejercicio
 	public void setTipo(Tipos tipo) {
 		this.tipo = tipo;
 	}
-	public String getTiempo() {
-		return tiempo;
-	}
-	public void setTiempo(String tiempo) {
-		this.tiempo = tiempo;
-	}
-	public String getSeries() {
-		return series;
-	}
-	public void setSeries(String series) {
-		this.series = series;
-	}
-	public String getRepeticiones() {
-		return repeticiones;
-	}
-	public void setRepeticiones(String repeticiones) {
-		this.repeticiones = repeticiones;
-	}
-	public String getPesos() {
-		return pesos;
-	}
-	public void setPesos(String pesos) {
-		this.pesos = pesos;
-	}
 	public NroDias getNroDia() {
 		return nroDia;
 	}
 	public void setNroDia(NroDias nroDia) {
 		this.nroDia = nroDia;
-	}
-	@Override
-	public String toString() {
-		return "Ejercicio [rutina=" + rutina + ", tipoEjercicio=" + tipoEjercicio + ", nroDia=" + nroDia + ", orden="
-				+ orden + ", tipo=" + tipo + ", tiempo=" + tiempo + ", series=" + series + ", repeticiones="
-				+ repeticiones + ", pesos=" + pesos + "]";
 	}
 	@Override
 	public int hashCode() {
@@ -134,5 +104,35 @@ public class Ejercicio
 		} else if (!rutina.equals(other.rutina))
 			return false;
 		return true;
+	}
+	public String getSeries() {
+		return series;
+	}
+	public void setSeries(String series) {
+		this.series = series;
+	}
+	public String getRepeticiones() {
+		return repeticiones;
+	}
+	public void setRepeticiones(String repeticiones) {
+		this.repeticiones = repeticiones;
+	}
+	public String getPesos() {
+		return pesos;
+	}
+	public void setPesos(String pesos) {
+		this.pesos = pesos;
+	}
+	public String getTiempo() {
+		return tiempo;
+	}
+	public void setTiempo(String tiempo) {
+		this.tiempo = tiempo;
+	}
+	@Override
+	public String toString() {
+		return "Ejercicio [rutina=" + rutina + ", tipoEjercicio=" + tipoEjercicio + ", nroDia=" + nroDia + ", orden="
+				+ orden + ", tipo=" + tipo + ", series=" + series + ", repeticiones=" + repeticiones + ", pesos="
+				+ pesos + ", tiempo=" + tiempo + "]";
 	}
 }

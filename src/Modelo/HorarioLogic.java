@@ -7,41 +7,56 @@ import Entidades.*;
 
 public class HorarioLogic 
 {
-	public Collection<Horario> BuscarHorarios()
+	private AdaptadorHorario horarioAdapter;
+	
+	public HorarioLogic()
 	{
-		AdaptadorHorario horarioAdapter = new AdaptadorHorario();
+		horarioAdapter = new AdaptadorHorario();
+	}
+	
+	public Collection<Horario> BuscarHorarios() throws Exception
+	{
 		return horarioAdapter.FindAll();
 	}
 	
-	public Collection<Horario> BuscarPorNombreSucursal(String nombreSucursal)
+	public Collection<Horario> BuscarPorNombreSucursal(String nombreSucursal) throws Exception
 	{
-		AdaptadorHorario horarioAdapter = new AdaptadorHorario();
 		return horarioAdapter.BuscarPorNombreSucursal(nombreSucursal);
 	}
 	
-	public boolean EliminarHorario(Horario h)
+	public void EliminarHorario(Horario h) throws Exception
 	{
-		AdaptadorHorario horarioAdapter = new AdaptadorHorario();
-		return horarioAdapter.Delete(h);
+		horarioAdapter.Delete(h);
 	}
 	
-	public boolean EditarHorario(Horario h)
-	{
-		AdaptadorHorario horarioAdapter = new AdaptadorHorario();
-		return horarioAdapter.Update(h);
-	}
-	
-	public boolean AgregarHorario(Horario h)
+	public void EditarHorario(Horario h) throws Exception
 	{
 		if(h.getSucursal().getNombreSucursal() != null && h.getDia().getNroDia() != 0 
-				&& h.getHoraDesde() != null && h.getHoraHasta() != null)
+			&& h.getHoraDesdeString() != null && h.getHoraHastaString() != null
+			&& h.getHoraDesdeString().length() == 6 && h.getHoraHastaString().length() == 6
+			&& h.getIdHoraDesdeString() != null && h.getIdHoraDesdeString().length() == 6)
 		{
-			AdaptadorHorario horarioAdapter = new AdaptadorHorario();
-			return horarioAdapter.Insert(h);
+			horarioAdapter.Update(h);
 		}
 		else
 		{
-			return false;
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
+		}
+	}
+	
+	public void AgregarHorario(Horario h) throws Exception
+	{
+		if(h.getSucursal().getNombreSucursal() != null && h.getDia().getNroDia() != 0 
+			&& h.getHoraDesdeString() != null && h.getHoraHastaString() != null
+			&& h.getHoraDesdeString().length() == 6 && h.getHoraHastaString().length() == 6)
+		{
+			horarioAdapter.Insert(h);
+		}
+		else
+		{
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
 		}
 	}
 }

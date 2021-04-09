@@ -5,7 +5,7 @@ import Entidades.*;
 
 public class AdaptadorUsuario
 {
-	public Usuario BuscarPorUsuarioYContrasenia(Usuario user)
+	public Usuario BuscarPorUsuarioYContrasenia(Usuario user) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -13,14 +13,14 @@ public class AdaptadorUsuario
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+			
 		try
 		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, user.getNombreUsuario());
-			statement.setString(2, user.getContrasenia());
+			statement.setString(2, user.getContraseniaEncriptada());
 			
 			rs = statement.executeQuery();
 			
@@ -35,7 +35,7 @@ public class AdaptadorUsuario
 				p.setDni(rs.getString("dni"));
 				nivel.setNroNivel(rs.getInt("nro_nivel"));				
 				user.setNombreUsuario(rs.getString("nombre_usuario"));
-				user.setContrasenia(rs.getString("contrasenia"));
+				user.setContraseniaEncriptada(rs.getString("contrasenia"));
 				
 				user.setPersona(personaAdapter.GetOne(p));
 				user.setNivelUsuario(nivelAdapter.GetOne(nivel));
@@ -47,42 +47,20 @@ public class AdaptadorUsuario
 		}
 		catch(Exception e)
 		{
-			user = null;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar usuario", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return user;
 	}
 	
-	public Usuario GetOne(Usuario user)
+	public Usuario GetOne(Usuario user) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -90,11 +68,11 @@ public class AdaptadorUsuario
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, user.getNombreUsuario());
 			
@@ -102,17 +80,19 @@ public class AdaptadorUsuario
 			
 			if(rs!=null && rs.next())
 			{
+				AdaptadorPersona personaAdapter = new AdaptadorPersona();
+				AdaptadorNivelUsuario nivelAdapter = new AdaptadorNivelUsuario();
+				
 				Persona p = new Persona();
 				NivelUsuario nivel = new NivelUsuario();
 				
-				nivel.setNroNivel(rs.getInt("nro_nivel"));
-
 				p.setDni(rs.getString("dni"));
-				
+				nivel.setNroNivel(rs.getInt("nro_nivel"));				
 				user.setNombreUsuario(rs.getString("nombre_usuario"));
-				user.setContrasenia(rs.getString("contrasenia"));
-				user.setPersona(p);
-				user.setNivelUsuario(nivel);
+				user.setContraseniaEncriptada(rs.getString("contrasenia"));
+				
+				user.setPersona(personaAdapter.GetOne(p));
+				user.setNivelUsuario(nivelAdapter.GetOne(nivel));
 			}
 			else
 			{
@@ -121,42 +101,20 @@ public class AdaptadorUsuario
 		}
 		catch(Exception e)
 		{
-			user = null;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar usuario", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return user;
 	}
 
-	public Usuario BuscarPorDni(Usuario user)
+	public Usuario BuscarPorDni(Usuario user) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -164,11 +122,11 @@ public class AdaptadorUsuario
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, user.getPersona().getDni());
 			
@@ -176,17 +134,19 @@ public class AdaptadorUsuario
 			
 			if(rs!=null && rs.next())
 			{
+				AdaptadorPersona personaAdapter = new AdaptadorPersona();
+				AdaptadorNivelUsuario nivelAdapter = new AdaptadorNivelUsuario();
+				
 				Persona p = new Persona();
 				NivelUsuario nivel = new NivelUsuario();
 				
-				nivel.setNroNivel(rs.getInt("nro_nivel"));
-
 				p.setDni(rs.getString("dni"));
-				
+				nivel.setNroNivel(rs.getInt("nro_nivel"));				
 				user.setNombreUsuario(rs.getString("nombre_usuario"));
-				user.setContrasenia(rs.getString("contrasenia"));
-				user.setPersona(p);
-				user.setNivelUsuario(nivel);
+				user.setContraseniaEncriptada(rs.getString("contrasenia"));
+				
+				user.setPersona(personaAdapter.GetOne(p));
+				user.setNivelUsuario(nivelAdapter.GetOne(nivel));
 			}
 			else
 			{
@@ -195,54 +155,31 @@ public class AdaptadorUsuario
 		}
 		catch(Exception e)
 		{
-			user = null;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar usuario", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return user;
 	}
 	
-	public boolean Delete(Usuario user)
+	public void Delete(Usuario user) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "DELETE FROM usuarios WHERE BINARY nombre_usuario=?";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, user.getNombreUsuario());
 			
@@ -250,49 +187,31 @@ public class AdaptadorUsuario
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al eliminar usuario", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 	
-	public boolean Insert(Usuario user)
+	public void Insert(Usuario user) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "INSERT INTO usuarios (nombre_usuario, contrasenia, dni, nro_nivel) VALUES (?, ?, ?, ?)";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, user.getNombreUsuario());
-			statement.setString(2, user.getContrasenia());
+			statement.setString(2, user.getContraseniaEncriptada());
 			statement.setString(3, user.getPersona().getDni());
 			statement.setInt(4, user.getNivelUsuario().getNroNivel());
 			
@@ -300,49 +219,31 @@ public class AdaptadorUsuario
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al agregar usuario", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 	
-	public boolean Update(Usuario user)
+	public void Update(Usuario user) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "UPDATE usuarios SET nombre_usuario=?, contrasenia=?, dni=?, nro_nivel=? WHERE nombre_usuario=?";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, user.getNombreUsuario());
-			statement.setString(2, user.getContrasenia());
+			statement.setString(2, user.getContraseniaEncriptada());
 			statement.setString(3, user.getPersona().getDni());
 			statement.setInt(4, user.getNivelUsuario().getNroNivel());
 			statement.setString(5, user.getId());
@@ -351,127 +252,74 @@ public class AdaptadorUsuario
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al actualizar usuario", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 	
-	public boolean UpdatePerfil(Usuario user)
+	public void UpdatePerfil(Usuario user) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "UPDATE usuarios SET nombre_usuario=?, contrasenia=? WHERE dni=?";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, user.getNombreUsuario());
-			statement.setString(2, user.getContrasenia());
+			statement.setString(2, user.getContraseniaEncriptada());
 			statement.setString(3, user.getPersona().getDni());
 			
 			statement.executeUpdate();
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al actualizar perfil", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 	
-	public boolean CambiarContrasenia(Usuario user)
+	public void CambiarContrasenia(Usuario user) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "UPDATE usuarios SET contrasenia=? WHERE nombre_usuario=?";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
-			statement.setString(1, user.getContrasenia());
+			statement.setString(1, user.getContraseniaEncriptada());
 			statement.setString(2, user.getNombreUsuario());
 			
 			statement.executeUpdate();
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al cambiar contraseña", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 }

@@ -1,8 +1,8 @@
 package Entidades;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 
 public class Rutina 
 {
@@ -10,9 +10,8 @@ public class Rutina
 		super();
 	}
 	private Persona persona;
-	private Date fecha;
-	private Date hora;
-	private String stringFechaHora;
+	private Timestamp fechaHora;
+	private String fechaHoraString;
 	private Collection<Ejercicio> ejerciciosDia1 = new ArrayList<Ejercicio>();
 	private Collection<Ejercicio> ejerciciosDia2 = new ArrayList<Ejercicio>();
 	private Collection<Ejercicio> ejerciciosDia3 = new ArrayList<Ejercicio>();
@@ -180,28 +179,23 @@ public class Rutina
 	public void setEjerciciosDia7(Collection<Ejercicio> ejerciciosDia7) {
 		this.ejerciciosDia7 = ejerciciosDia7;
 	}
-	public Date getFecha() {
-		return fecha;
+	public Timestamp getFechaHora() {
+		return fechaHora;
 	}
-	public void setFecha(Date fecha) {
-		this.fecha = fecha;
+	public void setFechaHora(Timestamp fechaHora) {
+		this.fechaHora = fechaHora;
 	}
-	public Date getHora() {
-		return hora;
+	public String getFechaHoraString() {
+		return fechaHoraString;
 	}
-	public void setHora(Date hora) {
-		this.hora = hora;
-	}
-	@Override
-	public String toString() {
-		return "Rutina [persona=" + persona + ", fecha=" + fecha + ", hora=" + hora + "]";
+	public void setFechaHoraString(String fechaHoraString) {
+		this.fechaHoraString = fechaHoraString;
 	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fecha == null) ? 0 : fecha.hashCode());
-		result = prime * result + ((hora == null) ? 0 : hora.hashCode());
+		result = prime * result + ((fechaHora == null) ? 0 : fechaHora.hashCode());
 		result = prime * result + ((persona == null) ? 0 : persona.hashCode());
 		return result;
 	}
@@ -214,15 +208,10 @@ public class Rutina
 		if (getClass() != obj.getClass())
 			return false;
 		Rutina other = (Rutina) obj;
-		if (fecha == null) {
-			if (other.fecha != null)
+		if (fechaHora == null) {
+			if (other.fechaHora != null)
 				return false;
-		} else if (!fecha.equals(other.fecha))
-			return false;
-		if (hora == null) {
-			if (other.hora != null)
-				return false;
-		} else if (!hora.equals(other.hora))
+		} else if (!fechaHora.equals(other.fechaHora))
 			return false;
 		if (persona == null) {
 			if (other.persona != null)
@@ -231,10 +220,8 @@ public class Rutina
 			return false;
 		return true;
 	}
-	public String getStringFechaHora() {
-		return stringFechaHora;
-	}
-	public void setStringFechaHora(String stringFechaHora) {
-		this.stringFechaHora = stringFechaHora;
+	@Override
+	public String toString() {
+		return "Rutina [persona=" + persona + ", fechaHora=" + fechaHora + "]";
 	}
 }

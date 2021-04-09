@@ -3,7 +3,6 @@ package BaseDeDatos;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -11,7 +10,7 @@ import Entidades.*;
 
 public class AdaptadorDia 
 {
-	public Dia GetOne(Dia dia)
+	public Dia GetOne(Dia dia) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -19,11 +18,11 @@ public class AdaptadorDia
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setInt(1, dia.getNroDia());
 			
@@ -41,42 +40,20 @@ public class AdaptadorDia
 		}
 		catch(Exception e)
 		{
-			dia = null;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar dia", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return dia;
 	}
 	
-	public Collection<Dia> FindAll()
+	public Collection<Dia> FindAll() throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -85,11 +62,11 @@ public class AdaptadorDia
 		ResultSet rs = null;
 		Collection<Dia> dias = new ArrayList<Dia>();
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			
 			rs = statement.executeQuery();
@@ -109,35 +86,14 @@ public class AdaptadorDia
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar dias", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return dias;

@@ -7,9 +7,15 @@ import Entidades.*;
 
 public class NivelUsuarioLogic 
 {
-	public Collection<NivelUsuario> BuscarNivelesUsuarios()
+	private AdaptadorNivelUsuario nivelUsuarioAdapter;
+	
+	public NivelUsuarioLogic()
 	{
-		AdaptadorNivelUsuario nivelUsuarioAdapter = new AdaptadorNivelUsuario();
+		nivelUsuarioAdapter = new AdaptadorNivelUsuario();
+	}
+	
+	public Collection<NivelUsuario> BuscarNivelesUsuarios() throws Exception
+	{
 		return nivelUsuarioAdapter.FindAll();
 	}
 }

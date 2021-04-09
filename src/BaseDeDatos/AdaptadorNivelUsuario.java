@@ -3,17 +3,14 @@ package BaseDeDatos;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import Entidades.*;
-import org.hibernate.*;
-import org.hibernate.cfg.Configuration;
 
 public class AdaptadorNivelUsuario
 {
-	public NivelUsuario GetOne(NivelUsuario nivel)
+	public NivelUsuario GetOne(NivelUsuario nivel) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -21,11 +18,11 @@ public class AdaptadorNivelUsuario
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setInt(1, nivel.getNroNivel());
 			
@@ -43,42 +40,20 @@ public class AdaptadorNivelUsuario
 		}
 		catch(Exception e)
 		{
-			nivel = null;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar nivel usuario", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return nivel;
 	}
 	
-	/*public Collection<NivelUsuario> FindAll()
+	public Collection<NivelUsuario> FindAll() throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -87,11 +62,11 @@ public class AdaptadorNivelUsuario
 		ResultSet rs = null;
 		Collection<NivelUsuario> nivelesUsuarios = new ArrayList<NivelUsuario>();
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			
 			rs = statement.executeQuery();
@@ -100,53 +75,32 @@ public class AdaptadorNivelUsuario
 			{
 				while(rs.next())
 				{
-					NivelUsuario nivel = new NivelUsuario();
+					NivelUsuario nivelUsuario = new NivelUsuario();
 					
-					nivel.setNroNivel(rs.getInt("nro_nivel"));
-					nivel.setDescripcion(rs.getString("descripcion"));
+					nivelUsuario.setNroNivel(rs.getInt("nro_nivel"));
+					nivelUsuario.setDescripcion(rs.getString("descripcion"));
 					
-					nivelesUsuarios.add(nivel);
+					nivelesUsuarios.add(nivelUsuario);
 				}
 			}
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar niveles usuarios", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return nivelesUsuarios;
-	}*/
+	}
 	
-	@SuppressWarnings("unchecked")
-	public Collection<NivelUsuario> FindAll()
+	/*@SuppressWarnings("unchecked")
+	public Collection<NivelUsuario> FindAll() throws Exception
 	{
 		SessionFactory miFactory = null;
 		Session miSesion = null;
@@ -165,7 +119,8 @@ public class AdaptadorNivelUsuario
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar niveles usuarios", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
@@ -174,5 +129,5 @@ public class AdaptadorNivelUsuario
 		}
 		
 		return nivelesUsuarios;
-	}
+	}*/
 }

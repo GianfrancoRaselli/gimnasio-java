@@ -1,0 +1,421 @@
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema gimnasio
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema gimnasio
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `gimnasio` DEFAULT CHARACTER SET utf8 ;
+USE `gimnasio` ;
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`precios_gimnasio`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`precios_gimnasio` (
+  `fecha_hora_desde` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `precio` REAL NOT NULL,
+  PRIMARY KEY (`fecha_hora_desde`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`dias`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`dias` (
+  `nro_dia` INT NOT NULL AUTO_INCREMENT,
+  `descripcion` VARCHAR(30) NOT NULL,
+  PRIMARY KEY (`nro_dia`),
+  UNIQUE INDEX `descripcion_UNIQUE` (`descripcion` ASC))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`provincias`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`provincias` (
+  `nombre_provincia` VARCHAR(30) NOT NULL,
+  PRIMARY KEY (`nombre_provincia`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`ciudades`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`ciudades` (
+  `cod_postal` VARCHAR(15) NOT NULL,
+  `descripcion` VARCHAR(30) NOT NULL,
+  `nombre_provincia` VARCHAR(30) NOT NULL,
+  PRIMARY KEY (`cod_postal`),
+  UNIQUE INDEX `descipcion_UNIQUE` (`descripcion` ASC),
+  INDEX `fk_ciudades_provincias1_idx` (`nombre_provincia` ASC),
+  CONSTRAINT `fk_ciudades_provincias1`
+    FOREIGN KEY (`nombre_provincia`)
+    REFERENCES `gimnasio`.`provincias` (`nombre_provincia`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`sucursales`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`sucursales` (
+  `nombre_sucursal` VARCHAR(30) NOT NULL,
+  `direccion` VARCHAR(30) NOT NULL,
+  `cod_postal` VARCHAR(15) NOT NULL,
+  PRIMARY KEY (`nombre_sucursal`),
+  INDEX `fk_sucursales_ciudades1_idx` (`cod_postal` ASC),
+  CONSTRAINT `fk_sucursales_ciudades1`
+    FOREIGN KEY (`cod_postal`)
+    REFERENCES `gimnasio`.`ciudades` (`cod_postal`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`horarios`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`horarios` (
+  `nombre_sucursal` VARCHAR(30) NOT NULL,
+  `nro_dia` INT NOT NULL,
+  `hora_desde` TIME NOT NULL,
+  `hora_hasta` TIME NOT NULL,
+  PRIMARY KEY (`nombre_sucursal`, `nro_dia`, `hora_desde`),
+  INDEX `fk_sucursales_has_dias_dias1_idx` (`nro_dia` ASC),
+  INDEX `fk_sucursales_has_dias_sucursales_idx` (`nombre_sucursal` ASC),
+  CONSTRAINT `fk_sucursales_has_dias_sucursales`
+    FOREIGN KEY (`nombre_sucursal`)
+    REFERENCES `gimnasio`.`sucursales` (`nombre_sucursal`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_sucursales_has_dias_dias1`
+    FOREIGN KEY (`nro_dia`)
+    REFERENCES `gimnasio`.`dias` (`nro_dia`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`niveles_usuarios`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`niveles_usuarios` (
+  `nro_nivel` INT NOT NULL AUTO_INCREMENT,
+  `descripcion` VARCHAR(15) NOT NULL,
+  PRIMARY KEY (`nro_nivel`),
+  UNIQUE INDEX `descripcion_UNIQUE` (`descripcion` ASC))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`personas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`personas` (
+  `dni` VARCHAR(20) NOT NULL,
+  `nombre_apellido` VARCHAR(45) NOT NULL,
+  `telefono` VARCHAR(30) NOT NULL,
+  `email` VARCHAR(30) NOT NULL,
+  `direccion` VARCHAR(30) NOT NULL,
+  `tipo` INT NOT NULL,
+  `cod_postal` VARCHAR(15) NOT NULL,
+  PRIMARY KEY (`dni`),
+  INDEX `fk_personas_ciudades1_idx` (`cod_postal` ASC),
+  CONSTRAINT `fk_personas_ciudades1`
+    FOREIGN KEY (`cod_postal`)
+    REFERENCES `gimnasio`.`ciudades` (`cod_postal`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`usuarios`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`usuarios` (
+  `nombre_usuario` VARCHAR(20) NOT NULL,
+  `contrasenia` VARCHAR(100) NOT NULL,
+  `nro_nivel` INT NOT NULL,
+  `dni` VARCHAR(20) NOT NULL,
+  PRIMARY KEY (`nombre_usuario`),
+  INDEX `fk_usuarios_niveles_usuarios1_idx` (`nro_nivel` ASC),
+  INDEX `fk_usuarios_personas1_idx` (`dni` ASC),
+  CONSTRAINT `fk_usuarios_niveles_usuarios1`
+    FOREIGN KEY (`nro_nivel`)
+    REFERENCES `gimnasio`.`niveles_usuarios` (`nro_nivel`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_usuarios_personas1`
+    FOREIGN KEY (`dni`)
+    REFERENCES `gimnasio`.`personas` (`dni`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`asistencias`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`asistencias` (
+  `fecha_hora` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `dni` VARCHAR(20) NOT NULL,
+  `nombre_sucursal` VARCHAR(30) NOT NULL,
+  PRIMARY KEY (`fecha_hora`, `dni`, `nombre_sucursal`),
+  INDEX `fk_asistencias_personas1_idx` (`dni` ASC),
+  INDEX `fk_asistencias_sucursales1_idx` (`nombre_sucursal` ASC),
+  CONSTRAINT `fk_asistencias_personas1`
+    FOREIGN KEY (`dni`)
+    REFERENCES `gimnasio`.`personas` (`dni`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_asistencias_sucursales1`
+    FOREIGN KEY (`nombre_sucursal`)
+    REFERENCES `gimnasio`.`sucursales` (`nombre_sucursal`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`cuotas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`cuotas` (
+  `anio` INT NOT NULL,
+  `mes` INT NOT NULL,
+  `total` REAL NOT NULL,
+  `fecha_hora_pago` TIMESTAMP NULL,
+  `dni` VARCHAR(20) NOT NULL,
+  PRIMARY KEY (`anio`, `mes`, `dni`),
+  INDEX `fk_cuotas_personas1_idx` (`dni` ASC),
+  CONSTRAINT `fk_cuotas_personas1`
+    FOREIGN KEY (`dni`)
+    REFERENCES `gimnasio`.`personas` (`dni`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`tipos_clases_personalizadas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`tipos_clases_personalizadas` (
+  `cod_tipo_clase_personalizada` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(20) NOT NULL,
+  `descripcion` VARCHAR(70) NULL,
+  `precio_x_clase` REAL NULL,
+  PRIMARY KEY (`cod_tipo_clase_personalizada`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`clases_personalizadas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`clases_personalizadas` (
+  `nombre_sucursal` VARCHAR(30) NOT NULL,
+  `fecha_hora_desde` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fecha_hora_hasta` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `capacidad_maxima` INT NOT NULL,
+  `cod_tipo_clase_personalizada` INT NOT NULL,
+  PRIMARY KEY (`nombre_sucursal`, `fecha_hora_desde`),
+  INDEX `fk_clases_personalizadas_tipos_clases_personalizadas1_idx` (`cod_tipo_clase_personalizada` ASC),
+  CONSTRAINT `fk_clases_personalizadas_sucursales1`
+    FOREIGN KEY (`nombre_sucursal`)
+    REFERENCES `gimnasio`.`sucursales` (`nombre_sucursal`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_clases_personalizadas_tipos_clases_personalizadas1`
+    FOREIGN KEY (`cod_tipo_clase_personalizada`)
+    REFERENCES `gimnasio`.`tipos_clases_personalizadas` (`cod_tipo_clase_personalizada`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`encargados`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`encargados` (
+  `nombre_sucursal` VARCHAR(30) NOT NULL,
+  `fecha_hora_desde` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `dni` VARCHAR(20) NOT NULL,
+  PRIMARY KEY (`nombre_sucursal`, `fecha_hora_desde`, `dni`),
+  INDEX `fk_clases_personalizadas_has_personas_personas1_idx` (`dni` ASC),
+  INDEX `fk_clases_personalizadas_has_personas_clases_personalizadas_idx` (`nombre_sucursal` ASC, `fecha_hora_desde` ASC),
+  CONSTRAINT `fk_clases_personalizadas_has_personas_clases_personalizadas1`
+    FOREIGN KEY (`nombre_sucursal` , `fecha_hora_desde`)
+    REFERENCES `gimnasio`.`clases_personalizadas` (`nombre_sucursal` , `fecha_hora_desde`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_clases_personalizadas_has_personas_personas1`
+    FOREIGN KEY (`dni`)
+    REFERENCES `gimnasio`.`personas` (`dni`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`inscripciones`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`inscripciones` (
+  `dni` VARCHAR(20) NOT NULL,
+  `estado` INT NOT NULL,
+  `fecha_hora_inscripcion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `nombre_sucursal` VARCHAR(30) NOT NULL,
+  `fecha_hora_desde` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`dni`, `fecha_hora_inscripcion`),
+  INDEX `fk_personas_has_clases_personalizadas_personas1_idx` (`dni` ASC),
+  INDEX `fk_inscripciones_clases_personalizadas1_idx` (`nombre_sucursal` ASC, `fecha_hora_desde` ASC),
+  CONSTRAINT `fk_personas_has_clases_personalizadas_personas1`
+    FOREIGN KEY (`dni`)
+    REFERENCES `gimnasio`.`personas` (`dni`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_inscripciones_clases_personalizadas1`
+    FOREIGN KEY (`nombre_sucursal` , `fecha_hora_desde`)
+    REFERENCES `gimnasio`.`clases_personalizadas` (`nombre_sucursal` , `fecha_hora_desde`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`tipos_ejercicios`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`tipos_ejercicios` (
+  `cod_tipo_ejercicio` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(20) NOT NULL,
+  `descripcion` VARCHAR(70) NULL,
+  PRIMARY KEY (`cod_tipo_ejercicio`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`rutinas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`rutinas` (
+  `fecha_hora` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `dni` VARCHAR(20) NOT NULL,
+  PRIMARY KEY (`dni`, `fecha_hora`),
+  INDEX `fk_rutina_personas1_idx` (`dni` ASC),
+  CONSTRAINT `fk_rutina_personas1`
+    FOREIGN KEY (`dni`)
+    REFERENCES `gimnasio`.`personas` (`dni`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`ejercicios`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`ejercicios` (
+  `orden` INT NOT NULL,
+  `tipo` VARCHAR(20) NOT NULL,
+  `tiempo` VARCHAR(20) NULL,
+  `cod_tipo_ejercicio` INT NOT NULL,
+  `dni` VARCHAR(20) NOT NULL,
+  `fecha_hora` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `series` VARCHAR(20) NULL,
+  `repeticiones` VARCHAR(45) NULL,
+  `pesos` VARCHAR(45) NULL,
+  `nro_dia` INT NOT NULL,
+  PRIMARY KEY (`orden`, `dni`, `fecha_hora`, `nro_dia`),
+  INDEX `fk_ejercicios_tipos_ejercicios1_idx` (`cod_tipo_ejercicio` ASC),
+  INDEX `fk_ejercicios_rutinas1_idx` (`dni` ASC, `fecha_hora` ASC),
+  CONSTRAINT `fk_ejercicios_tipos_ejercicios1`
+    FOREIGN KEY (`cod_tipo_ejercicio`)
+    REFERENCES `gimnasio`.`tipos_ejercicios` (`cod_tipo_ejercicio`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_ejercicios_rutinas1`
+    FOREIGN KEY (`dni` , `fecha_hora`)
+    REFERENCES `gimnasio`.`rutinas` (`dni` , `fecha_hora`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `gimnasio`.`actualizaciones_cuotas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `gimnasio`.`actualizaciones_cuotas` (
+  `anio` INT NOT NULL,
+  `mes` INT NOT NULL,
+  PRIMARY KEY (`anio`, `mes`))
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+
+INSERT INTO provincias VALUES ("Buenos Aires");
+INSERT INTO provincias VALUES ("Catamarca");
+INSERT INTO provincias VALUES ("Chaco");
+INSERT INTO provincias VALUES ("Chubut");
+INSERT INTO provincias VALUES ("Córdoba");
+INSERT INTO provincias VALUES ("Corrientes");
+INSERT INTO provincias VALUES ("Entre Ríos");
+INSERT INTO provincias VALUES ("Formosa");
+INSERT INTO provincias VALUES ("Jujuy");
+INSERT INTO provincias VALUES ("La Pampa");
+INSERT INTO provincias VALUES ("La Rioja");
+INSERT INTO provincias VALUES ("Mendoza");
+INSERT INTO provincias VALUES ("Misiones");
+INSERT INTO provincias VALUES ("Neuquén");
+INSERT INTO provincias VALUES ("Río Negro");
+INSERT INTO provincias VALUES ("Salta");
+INSERT INTO provincias VALUES ("San Juan");
+INSERT INTO provincias VALUES ("San Luis");
+INSERT INTO provincias VALUES ("Santa Cruz");
+INSERT INTO provincias VALUES ("Santa Fe");
+INSERT INTO provincias VALUES ("Santiago del Estero");
+INSERT INTO provincias VALUES ("Tierra del Fuego");
+INSERT INTO provincias VALUES ("Tucumán");
+
+INSERT INTO ciudades VALUES("3560", "Reconquista", "Santa Fe");
+INSERT INTO ciudades VALUES("2000", "Rosario", "Santa Fe");
+INSERT INTO ciudades VALUES("3000", "Santa Fe", "Santa Fe");
+
+INSERT INTO niveles_usuarios VALUES (1, "administrador");
+INSERT INTO niveles_usuarios VALUES (2, "usuario");
+
+INSERT INTO personas VALUES ("42531073", "Gianfranco Raselli", "3482334910", "gianrase@hotmail.com", "Iriondo 1465", 1, "3560");
+INSERT INTO personas VALUES ("41931639", "Lis Masin", "3482608408", "lismasin99@gmail.com", "Calle 42", 2, "3560");
+INSERT INTO personas VALUES ("perruno", "Cira Masin", "348235862", "cirita@hotmail.com", "Con la lis", 3, "3560");
+
+INSERT INTO usuarios VALUES ("GianRase", "e961b2ac40aac4cc36a8bf65bca9177e", 1, "42531073");
+INSERT INTO usuarios VALUES ("LisMasin", "e961b2ac40aac4cc36a8bf65bca9177e", 1, "41931639");
+INSERT INTO usuarios VALUES ("CiraMasin", "e961b2ac40aac4cc36a8bf65bca9177e", 2, "perruno");
+
+INSERT INTO dias VALUES(1, "Lunes");
+INSERT INTO dias VALUES(2, "Martes");
+INSERT INTO dias VALUES(3, "Miércoles");
+INSERT INTO dias VALUES(4, "Jueves");
+INSERT INTO dias VALUES(5, "Viernes");
+INSERT INTO dias VALUES(6, "Sábado");
+INSERT INTO dias VALUES(7, "Domingo");
+
+INSERT INTO sucursales VALUES("Sucursal Norte", "Maipú 1250", "2000");
+
+INSERT INTO actualizaciones_cuotas VALUES(2020, 1);
+
+INSERT INTO precios_gimnasio VALUES("20200101120000", 650);
+
+INSERT INTO tipos_ejercicios VALUES(1, "Bicicleta", "En la bicicleta del rincón");
+INSERT INTO tipos_ejercicios VALUES(2, "Biceps", null);
+INSERT INTO tipos_ejercicios VALUES(3, "Banco plano", "Acostado en el banco");
+INSERT INTO tipos_ejercicios VALUES(4, "Triceps", null);
+
+INSERT INTO tipos_clases_personalizadas VALUES(1, "Pilates", null, 50);
+INSERT INTO tipos_clases_personalizadas VALUES(2, "Yoga", "Buen ejercicio para relajar", 25);
+INSERT INTO tipos_clases_personalizadas VALUES(3, "Boxeo", null, 100);
+
+create user 'java'@'localhost' identified by 'java';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `gimnasio`.* TO 'java'@'localhost';

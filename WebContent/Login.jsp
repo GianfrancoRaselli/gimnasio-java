@@ -1,9 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8" session="true"%>
 
-<%@ page import="Entidades.*, Controlador.*"%>
+<%@ page import="Entidades.*, Controlador.*, Servlets.*, Util.*"%>
 
-	<% 
+	<%
+	try
+	{
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response.setHeader("Pragma", "no-cache");
 		response.setHeader("Expires", "0");
@@ -20,7 +22,7 @@
 			}
 			else if(userSesion.getNivelUsuario().getDescripcion().equals("administrador"))
 			{
-				response.sendRedirect("Personas.jsp");
+				response.sendRedirect("Inicio.jsp");
 			}
 		}
 		else
@@ -60,10 +62,48 @@
 			{
 				Usuario user = new Usuario();
 				user.setNombreUsuario(nombreUsuario);
-				user.setContrasenia(contrasenia);
+				user.setContraseniaEncriptada(contrasenia);
 				
 				ControladorSesion cl = new ControladorSesion();
-				cl.IniciarSesion(request, response, user);
+				user = cl.IniciarSesion(user);
+				
+				if(user != null)
+				{
+					sesion.setAttribute("usuario", user);
+							
+					Cookie CookieNombreUsuario = new Cookie("nombre_usuario", user.getNombreUsuario());
+					Cookie CookieContrasenia = new Cookie("contrasenia", user.getContraseniaEncriptada());
+					CookieNombreUsuario.setMaxAge(60*60*24*30);
+					CookieContrasenia.setMaxAge(60*60*24*30);
+					response.addCookie(CookieNombreUsuario);
+					response.addCookie(CookieContrasenia);
+							
+					response.sendRedirect("Inicio.jsp");
+				}
+				else
+				{
+					usuarioEncontrado = false;
+					contraseniaEncontrada = false;
+					for(Cookie cookieTemp: cookies)
+					{
+						if("nombre_usuario".equals(cookieTemp.getName()))
+						{
+							cookieTemp.setValue("");
+							response.addCookie(cookieTemp);
+							usuarioEncontrado = true;
+						}
+						if("contrasenia".equals(cookieTemp.getName()))
+						{
+							cookieTemp.setValue("");
+							response.addCookie(cookieTemp);
+							contraseniaEncontrada = true;
+						}
+						if(usuarioEncontrado && contraseniaEncontrada)	
+						{
+							break;
+						}
+					}
+				}
 			}
 		}
 	%>
@@ -159,9 +199,9 @@
 
 </head>
 
-<body>
+<body style="padding-right: 1%; padding-left: 1%;">
 
-		<form action="ControladorSesion" method="post" name="login" onsubmit="return validar();">
+		<form action="ServletSesion" method="post" name="login" onsubmit="return validar();">
 			<input type="hidden" name="instruccion" value="iniciar_sesion">
 			<div class="login">
 				<div class="login-screen">
@@ -238,6 +278,10 @@
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 </body>
 </html>
-<% 
-}
-%>
+<%}}
+catch(Exception e)
+{
+	RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+	request.setAttribute("exception", e);
+	dispatcher.forward(request, response);
+}%>

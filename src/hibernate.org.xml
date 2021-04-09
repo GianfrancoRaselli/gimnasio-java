@@ -3,9 +3,9 @@
 	<hibernate-configuration>
 		<session-factory>
 			<property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-			<property name="connection.url">jdbc:mysql://localhost:3306/gimnasio?serverTimezone=UTC</property>
+			<property name="connection.url">jdbc:mysql://node59720-gimnasio-java.jelastic.saveincloud.net:3306/gimnasio</property>
 			<property name="connection.username">root</property>
-			<property name="connection.password"></property>
+			<property name="connection.password">FMTmxp13103</property>
 			<property name="dialect">org.hibernate.dialect.MySQL5Dialect</property>
 			<property name="hibernate.show_sql">true</property>		
 		</session-factory>

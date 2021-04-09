@@ -18,10 +18,8 @@ public class RecuperarContraseniaLogic
         return ((rnd.nextInt(900000)) + 100000);
 	}
 	
-	public boolean EnviarCorreo(int cod, String emailReceptor) 
+	public void EnviarCorreo(int cod, String emailReceptor) throws Exception 
 	{
-		boolean correoEnviado = true;
-		
 		Properties properties = new Properties();
 		properties.setProperty("mail.smtp.host", "smtp.gmail.com");
 		properties.setProperty("mail.smtp.starttls.enable", "true");
@@ -51,21 +49,12 @@ public class RecuperarContraseniaLogic
 		} 
 		catch (MessagingException e) 
 		{
-			correoEnviado = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al enviar correo a " + emailReceptor, e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try 
-			{
-				if(transport != null) transport.close();
-			} 
-			catch (MessagingException e) 
-			{
-				e.printStackTrace();
-			}
+			if(transport != null) transport.close();
 		}
-		
-		return correoEnviado;
 	}
 }

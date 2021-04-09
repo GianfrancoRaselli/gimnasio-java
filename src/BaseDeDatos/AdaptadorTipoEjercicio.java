@@ -3,7 +3,6 @@ package BaseDeDatos;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -11,7 +10,7 @@ import Entidades.*;
 
 public class AdaptadorTipoEjercicio 
 {
-	public TipoEjercicio GetOne(TipoEjercicio te)
+	public TipoEjercicio GetOne(TipoEjercicio te) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -19,11 +18,11 @@ public class AdaptadorTipoEjercicio
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setInt(1, te.getCodTipoEjercicio());
 			
@@ -42,42 +41,20 @@ public class AdaptadorTipoEjercicio
 		}
 		catch(Exception e)
 		{
-			te = null;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar tipo ejercicio", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return te;
 	}
 	
-	public Collection<TipoEjercicio> FindAll()
+	public Collection<TipoEjercicio> FindAll() throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -86,11 +63,11 @@ public class AdaptadorTipoEjercicio
 		ResultSet rs = null;
 		Collection<TipoEjercicio> tiposEjercicios = new ArrayList<TipoEjercicio>();
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			
 			rs = statement.executeQuery();
@@ -111,35 +88,14 @@ public class AdaptadorTipoEjercicio
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar tipos ejercicios", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return tiposEjercicios;

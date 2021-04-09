@@ -1,9 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8" session="true"%>
 
-<%@ page import="Entidades.*, Controlador.*, java.util.*"%>
+<%@ page import="Entidades.*, Controlador.*, java.util.*, Servlets.*"%>
 
 	<% 
+	try
+	{
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response.setHeader("Pragma", "no-cache");
 		response.setHeader("Expires", "0");
@@ -32,10 +34,12 @@
 		if((request.getAttribute("sucursales") == null))
 		{
 			ControladorSucursal cs = new ControladorSucursal();
-			cs.BuscarSucursales(request, response);
+			sucursales = cs.BuscarSucursales();
 		}
-
-		sucursales = (ArrayList<Sucursal>) request.getAttribute("sucursales");
+		else
+		{
+			sucursales = (ArrayList<Sucursal>) request.getAttribute("sucursales");
+		}
 	%>
 	
 <!DOCTYPE html>
@@ -47,62 +51,72 @@
 <meta name="keywords" content="">
 <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maxium-scale=1.0, minimum-scale=1.0">
 <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+<script src="https://kit.fontawesome.com/5520773c7b.js" crossorigin="anonymous"></script>
 <title>Sucursales</title>
 
 <style type="text/css">
-	@media (max-width: 991px){
-		
+	.modal{
+		display: none;
+		position: fixed;
+		width: 40%;
+		height: auto;
+		z-index: 1;
+		top: auto;
+		bottom: 0;
+		left: auto;
+		right: 0;
 	}
-	
-	.modalContainer {
-			display: none; 
-			position: absolute; 
-			z-index: 1;		
-			padding-top: 1%;
-			left: 0;
-			top: 0;
-			width: 100%;
-			height: 100%; 
-			overflow: hidden; 
-			background-color: rgb(0,0,0);
-			background-color: rgba(0,0,0,0.4);
-		}
 
-		.modalContainer .modal-content {
-			background-color: #fefefe;
-			margin: auto;
-			padding: 1.5%;
-			border: 1px solid lightgray;
-			width: 50%;
-		}
+	.modalContainer {
+		display: none; 
+		position: absolute; 
+		z-index: 1;		
+		padding-top: 1%;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%; 
+		overflow: hidden; 
+		background-color: rgb(0,0,0);
+		background-color: rgba(0,0,0,0.4);
+	}
+
+	.modalContainer .modal-content {
+		background-color: #fefefe;
+		margin: auto;
+		padding: 1.5%;
+		border: 1px solid lightgray;
+		width: 50%;
+	}
 		
-		.tabla{
-			margin-top: 1%;
-			width: 100%;
-			text-align: center;
-		}
+	.tabla{
+		margin-top: 1%;
+		width: 100%;
+		text-align: center;
+	}
 		
-		#modalExito{
-			display: none;
-		}
+	#modalExito{
+		display: none;
+	}
 		
-		#modalError{
-			display: none;
-		}
+	#modalError{
+		display: none;
+	}
 		
-		#modalAdvertencia{
-			display: none;
-		}
+	#modalAdvertencia{
+		display: none;
+	}
 </style>
 	
 </head>
+
 <body style="background-color:#E1E1E1; padding-right: 1%; padding-left: 1%;"> 
 
 <%
 	String modal = (String)request.getAttribute("modal");
 %>
 
-<div class="alert alert-success alert-dismissible fade show" role="alert" id="modalExito">
+<div class="alert alert-success alert-dismissible fade show modal" role="alert" id="modalExito">
   			<%
 				if(modal != null)
 				{
@@ -125,7 +139,7 @@
   </button>
 </div>
 
-<div class="alert alert-danger alert-dismissible fade show" role="alert" id="modalError">
+<div class="alert alert-danger alert-dismissible fade show modal" role="alert" id="modalError">
   			<%
 				if(modal != null)
 				{
@@ -148,7 +162,7 @@
   </button>
 </div>
 
-<div class="alert alert-warning alert-dismissible fade show" role="alert" id="modalAdvertencia">
+<div class="alert alert-warning alert-dismissible fade show modal" role="alert" id="modalAdvertencia">
   			<%
 				if(modal != null)
 				{
@@ -180,7 +194,7 @@
 	</div>
 	
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		  <a class="navbar-brand">Administrador</a>
+		  <a class="navbar-brand" href="Inicio.jsp">Gimnasio</a>
 		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
 		    <span class="navbar-toggler-icon"></span>
 		  </button>
@@ -191,27 +205,28 @@
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 		      		<a class="dropdown-item" href="Personas.jsp">Ver todas las personas</a> 
 					<a class="dropdown-item" href="RegistrarPersona.jsp">Registrar nueva persona</a> 
+					<a class="dropdown-item" href="BuscarUsuario.jsp">Buscar usuario</a> 
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Cuotas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="PagarCuota.jsp">Pagar cuota</a> 
+					<a class="dropdown-item" href="BuscarPersona.jsp">Pagar cuotas</a> 
+					<a class="dropdown-item" href="MisCuotas.jsp">Mis cuotas</a> 
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rutinas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="RegistrarRutina.jsp">Registrar nueva rutina</a> 
-					<a class="dropdown-item" href="Rutinas.jsp">Ver rutinas</a> 
+					<a class="dropdown-item" href="BuscarPersonaDeRutina.jsp">Registrar nueva rutina</a> 
+					<a class="dropdown-item" href="MisRutinas.jsp">Mis rutinas</a> 
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Clases personalizadas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="">Ver todas las clases personalizadas</a> 
-					<a class="dropdown-item" href="">Agregar nueva clase personalizada</a>
-					<a class="dropdown-item" href="">Registrarse a una clase personalizada</a> 
+		      		<a class="dropdown-item" href="Asistencias.jsp">Registrar asistencias</a>
+					<a class="dropdown-item" href="ClasesPersonalizadas.jsp">Ver clases personalizadas</a>
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
@@ -225,41 +240,25 @@
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Entrada</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-		      		<a class="dropdown-item" href="">Validar entrada</a> 
+		      		<a class="dropdown-item" href="ValidarEntrada.jsp">Validar entrada</a> 
 		        </div>
 		      </li>
 		    </ul>
+		    <ul class="navbar-nav user">
+			 	<li class="nav-item dropdown">
+				  	<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    	<i class="fas fa-user"></i>&nbsp;<%= userSesion.getNombreUsuario() %>
+				    </a>
+				    <div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
+				      	<a class="dropdown-item" href="Perfil.jsp"><i class="far fa-id-card"></i>&nbsp;Perfil</a>
+						<form action="ServletSesion" method="post" name="Cerrar">
+							<input type="hidden" name="instruccion" value="cerrar_sesion">
+							<button style="color: red;" class="dropdown-item" type="submit"><i class="fas fa-sign-out-alt"></i>&nbsp;Cerrar sesión</button>
+						</form> 
+				  	</div>
+				</li>
+			</ul>
 		  </div>
-		  <div style="margin-right: auto">
-			  <div class="collapse navbar-collapse" id="navbarNavDropdown">
-			  	<ul class="navbar-nav">
-			  		<li class="nav-item dropdown">
-				    	<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				       		<%= userSesion.getNombreUsuario() %>
-				        </a>
-				       	<div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
-				        	<a class="dropdown-item" href="Perfil.jsp">Perfil</a>
-							<form action="ControladorSesion" method="post" name="Cerrar">
-								<input type="hidden" name="instruccion" value="cerrar_sesion">
-								<button style="color: red;" class="dropdown-item" type="submit">Cerrar sesión</button>
-							</form> 
-				   		</div>
-					</li>
-			  	</ul>
-			  </div>
-			</div>
-		</nav>
-			
-		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<h2>Sucursales</h2>&nbsp;
-			<div style="background-color: #E3FBE3;"><a href="RegistrarSucursal.jsp" class="btn btn-outline-success" style="margin-top: auto; margin-bottom: auto;">Registrar nueva sucursal</a></div>
-			<div style="margin-left: auto">
-				<form class="form-inline my-2 my-lg-0" action="ControladorSucursal" method="post" name="busqueda_por_nombre_sucursal">
-					<input type="hidden" name="instruccion" value="buscar_por_nombre_sucursal">
-			     	<input class="form-control mr-sm-2" type="search" placeholder="Buscar sucursal" aria-label="Search" name="nombre_sucursal">
-			     	<div style="background-color: #E3FBE3;"><button class="btn btn-outline-success my-2 my-sm-0" type="submit">Buscar</button></div>
-		    	</form>
-	    	</div>
 		</nav>
 		
 		<div style="text-align: center; margin-top: 1%;">
@@ -267,6 +266,8 @@
 		  <tr style="background-color: #ABA6A5">
 		    <th scope="col" style="border: 2px solid black">Nombre sucursal</th>
 		    <th scope="col" style="border: 2px solid black">Dirección</th>
+		    <th scope="col" style="border: 2px solid black">Ciudad</th>
+		    <th scope="col" style="border: 2px solid black">Provincia</th>
 		    <th scope="col" style="border: 2px solid black">Acción</th>
 		  </tr>
 		  <% 	
@@ -277,9 +278,11 @@
 			  	<tr style='background-color: #E3E3E3'>
 			  	<td style='border: 2px solid black'><%=s.getNombreSucursal()%></td>
 			  	<td style='border: 2px solid black'><%=s.getDireccion()%></td>
+			  	<td style='border: 2px solid black'><%=s.getCiudad().getDescripcion()%></td>
+			  	<td style='border: 2px solid black'><%=s.getCiudad().getProvincia().getNombreProvincia()%></td>
 			  	<td style='border: 2px solid black'>
 				  	<div class="row" style="margin: auto;">
-					  	<form action="ControladorSucursal" method="post" name="sucursales">
+					  	<form action="ServletSucursal" method="post" name="sucursales">
 							<input type="hidden" name="instruccion" value="editar_sucursal">
 							<input type="hidden" name="nombre_sucursal" value="<%=s.getNombreSucursal()%>">
 							<div style="background-color: #C9DFEA;"><button type="submit" class="btn btn-outline-primary btn-sm" style="width: 70px; color: black;">Editar</button></div>
@@ -289,7 +292,7 @@
 						<div style="background-color: #FFD5D3;"><button type="button" class="btn btn-outline-danger btn-sm" style="width: 70px; color: black;" onclick="abrirElimnar('<%=s.getNombreSucursal()%>')">Eliminar</button></div>
 						&nbsp;
 						 
-						<form action="ControladorHorario" method="post" name="sucursales">
+						<form action="ServletHorario" method="post" name="sucursales">
 							<input type="hidden" name="instruccion" value="buscar_por_nombre_sucursal">
 							<input type="hidden" name="nombre_sucursal" value="<%=s.getNombreSucursal()%>">
 							<div style="background-color: #EFF9A4;"><button type="submit" class="btn btn-outline-warning btn-sm" style="width: 70px; color: black;">Horarios</button></div>
@@ -342,6 +345,10 @@
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 </body>
 </html>
-<%
-}}
-%>
+<%}}}
+catch(Exception e)
+{
+	RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+	request.setAttribute("exception", e);
+	dispatcher.forward(request, response);
+}%>

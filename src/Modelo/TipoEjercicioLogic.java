@@ -7,15 +7,20 @@ import Entidades.*;
 
 public class TipoEjercicioLogic 
 {
-	public Collection<TipoEjercicio> BuscarTiposEjercicios()
+	private AdaptadorTipoEjercicio tipoEjercicioAdapter;
+	
+	public TipoEjercicioLogic()
 	{
-		AdaptadorTipoEjercicio tipoEjercicioAdapter = new AdaptadorTipoEjercicio();
+		tipoEjercicioAdapter = new AdaptadorTipoEjercicio();
+	}
+	
+	public Collection<TipoEjercicio> BuscarTiposEjercicios() throws Exception
+	{
 		return tipoEjercicioAdapter.FindAll();
 	}
 	
-	public TipoEjercicio BuscarTipoEjercicio(TipoEjercicio te)
+	public TipoEjercicio BuscarTipoEjercicio(TipoEjercicio te) throws Exception
 	{
-		AdaptadorTipoEjercicio tipoEjercicioAdapter = new AdaptadorTipoEjercicio();
 		return tipoEjercicioAdapter.GetOne(te);
 	}
 }

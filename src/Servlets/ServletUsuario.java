@@ -1,4 +1,4 @@
-package Controlador;
+package Servlets;
 
 import java.io.IOException;
 
@@ -13,61 +13,47 @@ import javax.servlet.http.HttpSession;
 import Entidades.*;
 import Modelo.*;
 
-@WebServlet("/ControladorUsuario")
-public class ControladorUsuario extends HttpServlet {
+@WebServlet("/ServletUsuario")
+public class ServletUsuario extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
-		HttpSession sesion = request.getSession();
-		
 		try
 		{
+			HttpSession sesion = request.getSession();
+			
 			if(sesion.getAttribute("usuario") != null)
-			{
-				Usuario user = (Usuario)sesion.getAttribute("usuario");
-				
-				if(user.getNivelUsuario().getDescripcion().equals("usuario"))
-				{
-					response.sendRedirect("Inicio.jsp");
-				}
-				else if(user.getNivelUsuario().getDescripcion().equals("administrador"))
-				{
-					response.sendRedirect("Personas.jsp");
-				}
+			{	
+				response.sendRedirect("Inicio.jsp");
 			}
 			else
 			{
 				response.sendRedirect("Login.jsp");
 			}
 		}
-		catch(IOException e)
+		catch(Exception e)
 		{
-			e.printStackTrace();
+			RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+			request.setAttribute("exception", e);
+			dispatcher.forward(request, response);
 		}
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
-		HttpSession sesion = request.getSession();
-		
-		if(sesion.getAttribute("usuario") == null)
+		try
 		{
-			try 
+			HttpSession sesion = request.getSession();
+			
+			if(sesion.getAttribute("usuario") == null)
 			{
-				response.sendRedirect("Login.jsp");
-			} 
-			catch (IOException e) 
-			{
-				e.printStackTrace();
-			} 
-		}
-		else
-		{
-			try
+				response.sendRedirect("Login.jsp"); 
+			}
+			else
 			{
 				String comando = request.getParameter("instruccion");
-				
+					
 				switch(comando)
 				{
 				case "buscar_por_dni":
@@ -87,14 +73,16 @@ public class ControladorUsuario extends HttpServlet {
 					break;
 				}
 			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+		}
+		catch(Exception e)
+		{
+			RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+			request.setAttribute("exception", e);
+			dispatcher.forward(request, response);
 		}
 	}
 	
-	public void AgregarUsuario(HttpServletRequest request, HttpServletResponse response)
+	public void AgregarUsuario(HttpServletRequest request, HttpServletResponse response) throws Exception 
 	{
 		Usuario user = new Usuario();
 		NivelUsuario nivel = new NivelUsuario();
@@ -115,27 +103,14 @@ public class ControladorUsuario extends HttpServlet {
 		user.setNivelUsuario(nivel);
 		
 		UsuarioLogic ul = new UsuarioLogic();
-		if(ul.AgregarUsuario(user))
-		{
-			request.setAttribute("modal", "usuario_agregado");
-		}
-		else
-		{
-			request.setAttribute("modal", "usuario_no_agregado");
-		}
+		ul.AgregarUsuario(user);
+		request.setAttribute("modal", "usuario_agregado");
 		
 		RequestDispatcher dispatcher = request.getRequestDispatcher("Personas.jsp");
-		try 
-		{
-			dispatcher.forward(request, response);
-		} 
-		catch (ServletException | IOException e) 
-		{
-			e.printStackTrace();
-		}
+		dispatcher.forward(request, response);
 	}
 
-	public void EditarUsuario(HttpServletRequest request, HttpServletResponse response)
+	public void EditarUsuario(HttpServletRequest request, HttpServletResponse response) throws Exception 
 	{
 		Usuario user = new Usuario();
 		NivelUsuario nivel = new NivelUsuario();
@@ -151,34 +126,20 @@ public class ControladorUsuario extends HttpServlet {
 		}
 		catch(NumberFormatException e)
 		{
-			System.out.print("d");
 			nivel.setNroNivel(0);
 		}
 		user.setPersona(p);
 		user.setNivelUsuario(nivel);
 		
 		UsuarioLogic ul = new UsuarioLogic();
-		if(ul.EditarUsuario(user))
-		{
-			request.setAttribute("modal", "usuario_modificado");
-		}
-		else
-		{
-			request.setAttribute("modal", "usuario_no_modificado");
-		}
+		ul.EditarUsuario(user);
+		request.setAttribute("modal", "usuario_modificado");
 		
 		RequestDispatcher dispatcher = request.getRequestDispatcher("Personas.jsp");
-		try 
-		{
-			dispatcher.forward(request, response);
-		} 
-		catch (ServletException | IOException e) 
-		{
-			e.printStackTrace();
-		}
+		dispatcher.forward(request, response);
 	}
 	
-	public void BuscarPorDni(HttpServletRequest request, HttpServletResponse response)
+	public void BuscarPorDni(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		Usuario user = new Usuario();
 		Persona p = new Persona();
@@ -191,17 +152,10 @@ public class ControladorUsuario extends HttpServlet {
 		RequestDispatcher dispatcher = request.getRequestDispatcher("Usuario.jsp");
 		request.setAttribute("usuario", user);
 		request.setAttribute("dni", request.getParameter("dni"));
-		try 
-		{
-			dispatcher.forward(request, response);
-		} 
-		catch (ServletException | IOException e) 
-		{
-			e.printStackTrace();
-		}
+		dispatcher.forward(request, response);
 	}
 	
-	public void BuscarUsuario(HttpServletRequest request, HttpServletResponse response)
+	public void BuscarUsuario(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		Usuario user = new Usuario();
 		user.setNombreUsuario(request.getParameter("nombre_usuario"));
@@ -222,39 +176,20 @@ public class ControladorUsuario extends HttpServlet {
 			dispatcher = request.getRequestDispatcher("BuscarUsuario.jsp");
 			request.setAttribute("usuarioNoEncontrado", "Usuario no encpntrado");
 		}
-		try 
-		{
-			dispatcher.forward(request, response);
-		} 
-		catch (ServletException | IOException e) 
-		{
-			e.printStackTrace();
-		}
+		
+		dispatcher.forward(request, response);
 	}
 	
-	public void EliminarUsuario(HttpServletRequest request, HttpServletResponse response)
+	public void EliminarUsuario(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		Usuario user = new Usuario();
 		user.setNombreUsuario(request.getParameter("nombre_usuario"));
 		
 		UsuarioLogic ul = new UsuarioLogic();
-		if(ul.EliminarUsuario(user))
-		{
-			request.setAttribute("modal", "usuario_eliminado");
-		}
-		else
-		{
-			request.setAttribute("modal", "usuario_no_eliminado");
-		}
+		ul.EliminarUsuario(user);
+		request.setAttribute("modal", "usuario_eliminado");
 		
 		RequestDispatcher dispatcher = request.getRequestDispatcher("Personas.jsp");
-		try 
-		{
-			dispatcher.forward(request, response);
-		} 
-		catch (ServletException | IOException e) 
-		{
-			e.printStackTrace();
-		}
+		dispatcher.forward(request, response);
 	}
 }

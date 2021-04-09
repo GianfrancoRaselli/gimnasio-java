@@ -3,13 +3,12 @@ package BaseDeDatos;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 import Entidades.*;
 
 public class AdaptadorPrecioGimnasio 
 {
-	public PrecioGimnasio GetPrecioActual()
+	public PrecioGimnasio GetPrecioActual() throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -20,11 +19,11 @@ public class AdaptadorPrecioGimnasio
 		ResultSet rs = null;
 		PrecioGimnasio pg = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			
 			rs = statement.executeQuery();
@@ -32,41 +31,20 @@ public class AdaptadorPrecioGimnasio
 			if(rs!=null && rs.next())
 			{
 				pg = new PrecioGimnasio();
-				pg.setFechaHoraDesde(rs.getDate("fecha_hora_desde"));
+				pg.setFechaHoraDesde(rs.getTimestamp("fecha_hora_desde"));
 				pg.setPrecio(rs.getDouble("precio"));
 			}
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar precio actual", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return pg;

@@ -1,6 +1,6 @@
 package Entidades;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 public class Cuota 
 {
@@ -11,7 +11,8 @@ public class Cuota
 	private int anio;
 	private int mes;
 	private double total;
-	private Date fechaHoraPago;
+	private Timestamp fechaHoraPago;
+	private String fechaHoraPagoString;
 	@Override
 	public String toString() {
 		return "Cuota [persona=" + persona + ", anio=" + anio + ", mes=" + mes + ", total=" + total + ", fechaHoraPago="
@@ -41,12 +42,6 @@ public class Cuota
 	public void setTotal(double total) {
 		this.total = total;
 	}
-	public Date getFechaHoraPago() {
-		return fechaHoraPago;
-	}
-	public void setFechaHoraPago(Date fechaHoraPago) {
-		this.fechaHoraPago = fechaHoraPago;
-	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -75,5 +70,17 @@ public class Cuota
 		} else if (!persona.equals(other.persona))
 			return false;
 		return true;
+	}
+	public String getFechaHoraPagoString() {
+		return fechaHoraPagoString;
+	}
+	public void setFechaHoraPagoString(String fechaHoraPagoString) {
+		this.fechaHoraPagoString = fechaHoraPagoString;
+	}
+	public Timestamp getFechaHoraPago() {
+		return fechaHoraPago;
+	}
+	public void setFechaHoraPago(Timestamp fechaHoraPago) {
+		this.fechaHoraPago = fechaHoraPago;
 	}
 }

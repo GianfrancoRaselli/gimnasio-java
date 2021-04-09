@@ -1,6 +1,6 @@
 package Entidades;
 
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.Collection;
 
 public class ClasePersonalizada 
@@ -10,9 +10,17 @@ public class ClasePersonalizada
 	}
 	private TipoClasePersonalizada tipoClasePersonalizada;
 	private Sucursal sucursal;
-	private Date fechaHoraDesde;
-	private Date fechaHoraHasta;
+	private Timestamp fechaHoraDesde;
+	private Timestamp fechaHoraHasta;
+	private String fechaHoraDesdeString;
+	private String fechaHoraHastaString;
+	private int nroAnio;
+	private int nroMes;
 	private int capacidadMaxima;
+	private boolean cuposDisponibles;
+	private boolean periodoHabilitado;
+	private boolean usuarioInscripto;
+	private Inscripcion ultimaInscripcionDelUsuario;
 	private Collection<Inscripcion> inscripciones;
 	private Collection<Persona> entrenadores;
 	public TipoClasePersonalizada getTipoClasePersonalizada() {
@@ -27,16 +35,16 @@ public class ClasePersonalizada
 	public void setSucursal(Sucursal sucursal) {
 		this.sucursal = sucursal;
 	}
-	public Date getFechaHoraDesde() {
+	public Timestamp getFechaHoraDesde() {
 		return fechaHoraDesde;
 	}
-	public void setFechaHoraDesde(Date fechaHoraDesde) {
+	public void setFechaHoraDesde(Timestamp fechaHoraDesde) {
 		this.fechaHoraDesde = fechaHoraDesde;
 	}
-	public Date getFechaHoraHasta() {
+	public Timestamp getFechaHoraHasta() {
 		return fechaHoraHasta;
 	}
-	public void setFechaHoraHasta(Date fechaHoraHasta) {
+	public void setFechaHoraHasta(Timestamp fechaHoraHasta) {
 		this.fechaHoraHasta = fechaHoraHasta;
 	}
 	public int getCapacidadMaxima() {
@@ -97,5 +105,53 @@ public class ClasePersonalizada
 		} else if (!sucursal.equals(other.sucursal))
 			return false;
 		return true;
+	}
+	public boolean isCuposDisponibles() {
+		return cuposDisponibles;
+	}
+	public void setCuposDisponibles(boolean cuposDisponibles) {
+		this.cuposDisponibles = cuposDisponibles;
+	}
+	public boolean isPeriodoHabilitado() {
+		return periodoHabilitado;
+	}
+	public void setPeriodoHabilitado(boolean periodoHabilitado) {
+		this.periodoHabilitado = periodoHabilitado;
+	}
+	public boolean isUsuarioInscripto() {
+		return usuarioInscripto;
+	}
+	public void setUsuarioInscripto(boolean usuarioInscripto) {
+		this.usuarioInscripto = usuarioInscripto;
+	}
+	public Inscripcion getUltimaInscripcionDelUsuario() {
+		return ultimaInscripcionDelUsuario;
+	}
+	public void setUltimaInscripcionDelUsuario(Inscripcion ultimaInscripcionDelUsuario) {
+		this.ultimaInscripcionDelUsuario = ultimaInscripcionDelUsuario;
+	}
+	public String getFechaHoraDesdeString() {
+		return fechaHoraDesdeString;
+	}
+	public void setFechaHoraDesdeString(String fechaHoraDesdeString) {
+		this.fechaHoraDesdeString = fechaHoraDesdeString;
+	}
+	public String getFechaHoraHastaString() {
+		return fechaHoraHastaString;
+	}
+	public void setFechaHoraHastaString(String fechaHoraHastaString) {
+		this.fechaHoraHastaString = fechaHoraHastaString;
+	}
+	public int getNroAnio() {
+		return nroAnio;
+	}
+	public void setNroAnio(int nroAnio) {
+		this.nroAnio = nroAnio;
+	}
+	public int getNroMes() {
+		return nroMes;
+	}
+	public void setNroMes(int nroMes) {
+		this.nroMes = nroMes;
 	}
 }

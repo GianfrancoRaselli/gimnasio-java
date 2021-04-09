@@ -1,8 +1,6 @@
-package Controlador;
+package Servlets;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -14,78 +12,57 @@ import javax.servlet.http.HttpSession;
 
 import Entidades.*;
 import Modelo.*;
+import Util.FormateoHora;
 
-@WebServlet("/ControladorRegistrarRutina")
-public class ControladorRegistrarRutina extends HttpServlet {
+@WebServlet("/ServletRegistrarRutina")
+public class ServletRegistarRutina extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-    private Rutina rutinaActual = null;
 	
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
-		HttpSession sesion = request.getSession();
-		
-		try
-		{
+    	try
+    	{
+			HttpSession sesion = request.getSession();
+			
 			if(sesion.getAttribute("usuario") != null)
 			{
-				Usuario user = (Usuario)sesion.getAttribute("usuario");
-				
-				if(user.getNivelUsuario().getDescripcion().equals("usuario"))
-				{
-					response.sendRedirect("Inicio.jsp");
-				}
-				else if(user.getNivelUsuario().getDescripcion().equals("administrador"))
-				{
-					response.sendRedirect("Personas.jsp");
-				}
+				response.sendRedirect("Inicio.jsp");
 			}
 			else
 			{
 				response.sendRedirect("Login.jsp");
 			}
-		}
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
+    	}
+    	catch(Exception e)
+    	{
+    		RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+			request.setAttribute("exception", e);
+			dispatcher.forward(request, response);
+    	}
 	}
 	
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		HttpSession sesion = request.getSession();
-		
-		if(sesion.getAttribute("usuario") == null)
+		try
 		{
-			try 
+			HttpSession sesion = request.getSession();
+			
+			if(sesion.getAttribute("usuario") == null)
 			{
 				response.sendRedirect("Login.jsp");
-			} 
-			catch (IOException e) 
-			{
-				e.printStackTrace();
 			}
-		}
-		else
-		{
-			Usuario userSesion = (Usuario)sesion.getAttribute("usuario");
-			
-			if(userSesion.getNivelUsuario().getDescripcion().equals("usuario"))
+			else
 			{
-				try 
+				Usuario userSesion = (Usuario)sesion.getAttribute("usuario");
+				
+				if(userSesion.getNivelUsuario().getDescripcion().equals("usuario"))
 				{
 					response.sendRedirect("Login.jsp");
-				} 
-				catch (IOException e) 
-				{
-					e.printStackTrace();
-				} 
-			}
-			else if(userSesion.getNivelUsuario().getDescripcion().equals("administrador"))
-			{
-				try
+				}
+				else if(userSesion.getNivelUsuario().getDescripcion().equals("administrador"))
 				{
 					String comando = request.getParameter("instruccion");
-					
+						
 					switch(comando)
 					{
 						case "buscar_persona":
@@ -102,15 +79,19 @@ public class ControladorRegistrarRutina extends HttpServlet {
 							break;
 					}
 				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-				}
 			}
+		}
+		catch(Exception e)
+		{
+			request.getSession().setAttribute("rutinaActual", null);
+			
+			RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+			request.setAttribute("exception", e);
+			dispatcher.forward(request, response);
 		}
 	}
 	
-	public void BuscarPersona(HttpServletRequest request, HttpServletResponse response)
+	public void BuscarPersona(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		Persona p = new Persona();
 		p.setDni(request.getParameter("dni"));
@@ -120,43 +101,34 @@ public class ControladorRegistrarRutina extends HttpServlet {
 		
 		if(p != null)
 		{	
-			rutinaActual = new Rutina();
+			Rutina rutinaActual = new Rutina();
 			rutinaActual.setPersona(p);
-			rutinaActual.setFecha(new Date());
+			rutinaActual.setFechaHoraString(FormateoHora.getFechaHoraActualEnFormatoBDD());
+			request.getSession().setAttribute("rutinaActual", rutinaActual);
 			
 			RequestDispatcher dispatcher = request.getRequestDispatcher("RegistrarRutina.jsp");
 			request.setAttribute("rutina", rutinaActual);
 			request.setAttribute("modo", "agregarEjercicios");
 			
-			try 
-			{
-				dispatcher.forward(request, response);
-			} 
-			catch (ServletException | IOException e) 
-			{
-					e.printStackTrace();
-			}			
+			dispatcher.forward(request, response);		
 		}
 		else 
 		{
+			request.getSession().setAttribute("rutinaActual", null);
+			
 			RequestDispatcher dispatcher = request.getRequestDispatcher("BuscarPersonaDeRutina.jsp");
 			request.setAttribute("personaNoEncontrada", request.getParameter("dni"));
 			
-			try 
-			{
-				dispatcher.forward(request, response);
-			} 
-			catch (ServletException | IOException e) 
-			{
-				e.printStackTrace();
-			}
+			dispatcher.forward(request, response);
 		}
 	}
 		
-	public void AgregarEjercicio(HttpServletRequest request, HttpServletResponse response)
+	public void AgregarEjercicio(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
-		if(rutinaActual != null)
+		if(request.getSession().getAttribute("rutinaActual") != null)
 		{
+			Rutina rutinaActual = (Rutina)request.getSession().getAttribute("rutinaActual");
+			
 			Ejercicio e = new Ejercicio();
 			
 			TipoEjercicioLogic tel = new TipoEjercicioLogic();
@@ -263,53 +235,38 @@ public class ControladorRegistrarRutina extends HttpServlet {
 						break;
 				}
 				
+				request.getSession().setAttribute("rutinaActual", rutinaActual);
+				
 				RequestDispatcher dispatcher = request.getRequestDispatcher("RegistrarRutina.jsp");
 				request.setAttribute("rutina", rutinaActual);
 				request.setAttribute("modo", "agregarEjercicios");
 					
-				try 
-				{
-					dispatcher.forward(request, response);
-				} 
-				catch (ServletException | IOException ex) 
-				{
-					ex.printStackTrace();
-				}	
+				dispatcher.forward(request, response);
 			}
 			else
 			{
+				request.getSession().setAttribute("rutinaActual", rutinaActual);
+				
 				RequestDispatcher dispatcher = request.getRequestDispatcher("RegistrarRutina.jsp");
 				request.setAttribute("rutina", rutinaActual);
 				request.setAttribute("modo", "agregarEjercicios");
 				request.setAttribute("modal", "ejercicio_no_agregado");
 					
-				try 
-				{
-					dispatcher.forward(request, response);
-				} 
-				catch (ServletException | IOException ex) 
-				{
-					ex.printStackTrace();
-				}	
+				dispatcher.forward(request, response);
 			}
 		}
 		else
 		{
-			try 
-			{
-				response.sendRedirect("BuscarPersonaDeRutina.jsp");
-			} 
-			catch (IOException e) 
-			{
-				e.printStackTrace();
-			}
+			response.sendRedirect("BuscarPersonaDeRutina.jsp");
 		}	
 	}
 	
-	public void EliminarEjercicio(HttpServletRequest request, HttpServletResponse response)
+	public void EliminarEjercicio(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if(rutinaActual != null)
+		if(request.getSession().getAttribute("rutinaActual") != null)
 		{
+			Rutina rutinaActual = (Rutina)request.getSession().getAttribute("rutinaActual");
+			
 			Ejercicio e = new Ejercicio();
 			
 			if(request.getParameter("dia") != null)
@@ -353,7 +310,6 @@ public class ControladorRegistrarRutina extends HttpServlet {
 			catch(Exception ex)
 			{
 				e.setOrden(0);
-				ex.printStackTrace();
 			}
 			
 			if(e.getNroDia() != null && e.getOrden() != 0)
@@ -383,124 +339,67 @@ public class ControladorRegistrarRutina extends HttpServlet {
 						break;
 				}
 				
+				request.getSession().setAttribute("rutinaActual", rutinaActual);
+				
 				RequestDispatcher dispatcher = request.getRequestDispatcher("RegistrarRutina.jsp");
 				request.setAttribute("rutina", rutinaActual);
 				request.setAttribute("modo", "agregarEjercicios");
 					
-				try 
-				{
-					dispatcher.forward(request, response);
-				} 
-				catch (ServletException | IOException ex) 
-				{
-					ex.printStackTrace();
-				}		
+				dispatcher.forward(request, response);	
 			}
 			else
 			{
+				request.getSession().setAttribute("rutinaActual", rutinaActual);
+				
 				RequestDispatcher dispatcher = request.getRequestDispatcher("RegistrarRutina.jsp");
 				request.setAttribute("rutina", rutinaActual);
 				request.setAttribute("modo", "agregarEjercicios");
 				request.setAttribute("modal", "ejercicio_no_eliminado");
 					
-				try 
-				{
-					dispatcher.forward(request, response);
-				} 
-				catch (ServletException | IOException ex) 
-				{
-					ex.printStackTrace();
-				}	
+				dispatcher.forward(request, response);
 			}
 		}
 		else
 		{
-			try 
-			{
-				response.sendRedirect("BuscarPersonaDeRutina.jsp");
-			} 
-			catch (IOException e) 
-			{
-				e.printStackTrace();
-			}
+			response.sendRedirect("BuscarPersonaDeRutina.jsp");
 		}	
 	}
 	
-	public void RegistrarRutina(HttpServletRequest request, HttpServletResponse response)
+	public void RegistrarRutina(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
-		if(rutinaActual != null && (!rutinaActual.getEjerciciosDia1().isEmpty() || 
-				!rutinaActual.getEjerciciosDia2().isEmpty() || !rutinaActual.getEjerciciosDia3().isEmpty() ||
-				!rutinaActual.getEjerciciosDia4().isEmpty() || !rutinaActual.getEjerciciosDia5().isEmpty() ||
-				!rutinaActual.getEjerciciosDia6().isEmpty() || !rutinaActual.getEjerciciosDia7().isEmpty()))
+		if(request.getSession().getAttribute("rutinaActual") != null)
 		{
-			RutinaLogic rl = new RutinaLogic();
-			
-			if(rl.AgregarRutina(rutinaActual))
+			Rutina rutinaActual = (Rutina)request.getSession().getAttribute("rutinaActual");
+		
+			if(!rutinaActual.getEjerciciosDia1().isEmpty() || !rutinaActual.getEjerciciosDia2().isEmpty() || !rutinaActual.getEjerciciosDia3().isEmpty() ||
+					!rutinaActual.getEjerciciosDia4().isEmpty() || !rutinaActual.getEjerciciosDia5().isEmpty() ||
+					!rutinaActual.getEjerciciosDia6().isEmpty() || !rutinaActual.getEjerciciosDia7().isEmpty())
 			{
-				if(rl.AgregarEjercicios(rutinaActual))
-				{
-					RequestDispatcher dispatcher = request.getRequestDispatcher("RegistrarRutina.jsp");
-					request.setAttribute("rutina", rutinaActual);
-					request.setAttribute("modo", "rutinaRegistrada");
-						
-					try 
-					{
-						dispatcher.forward(request, response);
-					} 
-					catch (ServletException | IOException e) 
-					{
-						e.printStackTrace();
-					}	
-				}
-				else
-				{
-					RequestDispatcher dispatcher = request.getRequestDispatcher("RegistrarRutina.jsp");
-					request.setAttribute("rutina", rutinaActual);
-					request.setAttribute("modo", "agregarEjercicios");
-					request.setAttribute("modal", "rutina_no_agregada");
-						
-					try 
-					{
-						dispatcher.forward(request, response);
-					} 
-					catch (ServletException | IOException e) 
-					{
-						e.printStackTrace();
-					}	
-				}
+				RutinaLogic rl = new RutinaLogic();
+				
+				rl.AgregarRutina(rutinaActual);
+				
+				request.getSession().setAttribute("rutinaActual", null);
+				
+				RequestDispatcher dispatcher = request.getRequestDispatcher("RegistrarRutina.jsp");
+				request.setAttribute("rutina", rutinaActual);
+				request.setAttribute("modo", "rutinaRegistrada");
+								
+				dispatcher.forward(request, response);
 			}
 			else
 			{
 				RequestDispatcher dispatcher = request.getRequestDispatcher("RegistrarRutina.jsp");
 				request.setAttribute("rutina", rutinaActual);
 				request.setAttribute("modo", "agregarEjercicios");
-				request.setAttribute("modal", "rutina_no_agregada");
-					
-				try 
-				{
-					dispatcher.forward(request, response);
-				} 
-				catch (ServletException | IOException e) 
-				{
-					e.printStackTrace();
-				}	
+				request.setAttribute("modal", "no_hay_ejercicios");
+				
+				dispatcher.forward(request, response);
 			}
 		}
 		else
 		{
-			RequestDispatcher dispatcher = request.getRequestDispatcher("RegistrarRutina.jsp");
-			request.setAttribute("rutina", rutinaActual);
-			request.setAttribute("modo", "agregarEjercicios");
-			request.setAttribute("modal", "no_hay_ejercicios");
-				
-			try 
-			{
-				dispatcher.forward(request, response);
-			} 
-			catch (ServletException | IOException e) 
-			{
-				e.printStackTrace();
-			}	
+			response.sendRedirect("BuscarPersonaDeRutina.jsp");
 		}	
 	}
 }

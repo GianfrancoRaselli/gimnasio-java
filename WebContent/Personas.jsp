@@ -1,9 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8" session="true"%>
 
-<%@ page import="Entidades.*, Controlador.*, java.util.*"%>
+<%@ page import="Entidades.*, Controlador.*, java.util.*, Servlets.*"%>
 
 	<% 
+	try
+	{
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response.setHeader("Pragma", "no-cache");
 		response.setHeader("Expires", "0");
@@ -28,16 +30,11 @@
 	
 	<% 
 		ArrayList<Persona> personas = new ArrayList<Persona>();
-	
-		if((request.getAttribute("personas") == null) && (request.getAttribute("persona") == null))
-		{
-			ControladorPersona cp = new ControladorPersona();
-			cp.BuscarPersonas(request, response);
-		}
 
 		if(request.getAttribute("persona") == null)
 		{
-			personas = (ArrayList<Persona>) request.getAttribute("personas");
+			ControladorPersona cp = new ControladorPersona();
+			personas = cp.BuscarPersonas();
 		}
 		else
 		{
@@ -58,29 +55,6 @@
 <title>Personas</title>
 
 <style type="text/css">
-	#navbar {
-		position: fixed;
-		z-index: 100;
-		width: 100%;
-		top: 0;
-	}
-		
-	@media (min-width: 991.5px) {
-		.user {
-			margin-left: auto;
-		}
-	}
-
-	@media (max-width: 991.5px) {
-		.user {
-			float: left;
-		}
-	}
-	
-	#content{
-		 margin-top: 56px;
-	}
-	
 	.modal{
 		display: none;
 		position: fixed;
@@ -120,10 +94,22 @@
 		width: 100%;
 		text-align: center;
 	}
+	
+	#modalExito{
+		display: none;
+	}
+		
+	#modalError{
+		display: none;
+	}
+		
+	#modalAdvertencia{
+		display: none;
+	}
 </style>	
 </head>
 
-<body style="background-color:#E1E1E1;"> 
+<body style="background-color:#E1E1E1; padding-right: 1%; padding-left: 1%;">
 
 <%
 	String modal = (String)request.getAttribute("modal");
@@ -215,7 +201,7 @@
 			<h4 style="margin-bottom: 3%;">¿Seguro que desea eliminar la persona con DNI: <div id="dniEliminar" style="display: inline-block;"></div>?</h4>
 			<div>
 				<button type="button" class="btn btn-secondary" onclick="cerrarEliminar()">Cancelar</button> 
-				<form action="ControladorPersona" method="post" name="personas" style="display: inline-block;">
+				<form action="ServletPersona" method="post" name="personas" style="display: inline-block;">
 					<input type="hidden" name="instruccion" value="eliminar_persona">
 					<input type="hidden" name="dni" id="inputEliminarPersona">
 					<button type="submit" class="btn btn-danger">Eliminar</button>
@@ -226,7 +212,7 @@
 	
 	<div id="navbar">
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		  <a class="navbar-brand">Administrador</a>
+		  <a class="navbar-brand" href="Inicio.jsp">Gimnasio</a>
 		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
 		    <span class="navbar-toggler-icon"></span>
 		  </button>
@@ -257,7 +243,8 @@
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Clases personalizadas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="ClasesPersonalizadas.jsp">Ver todas las clases personalizadas</a>
+		      		<a class="dropdown-item" href="Asistencias.jsp">Registrar asistencias</a>
+					<a class="dropdown-item" href="ClasesPersonalizadas.jsp">Ver clases personalizadas</a>
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
@@ -282,7 +269,7 @@
 				    </a>
 				    <div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
 				      	<a class="dropdown-item" href="Perfil.jsp"><i class="far fa-id-card"></i>&nbsp;Perfil</a>
-						<form action="ControladorSesion" method="post" name="Cerrar">
+						<form action="ServletSesion" method="post" name="Cerrar">
 							<input type="hidden" name="instruccion" value="cerrar_sesion">
 							<button style="color: red;" class="dropdown-item" type="submit"><i class="fas fa-sign-out-alt"></i>&nbsp;Cerrar sesión</button>
 						</form> 
@@ -298,7 +285,7 @@
 			<h2>Personas</h2>&nbsp;
 			<div style="background-color: #E3FBE3;"><a href="RegistrarPersona.jsp" class="btn btn-outline-success" style="margin-top: auto; margin-bottom: auto;">Registrar nueva persona</a></div>
 			<div style="margin-left: auto">
-				<form class="form-inline my-2 my-lg-0" action="ControladorPersona" method="post" name="busqueda_por_dni">
+				<form class="form-inline my-2 my-lg-0" action="ServletPersona" method="post" name="busqueda_por_dni">
 					<input type="hidden" name="instruccion" value="buscar_por_dni">
 			     	<input class="form-control mr-sm-2" type="search" placeholder="Buscar por DNI" aria-label="Search" name="dni">
 			     	<div style="background-color: #E3FBE3;"><button class="btn btn-outline-success my-2 my-sm-0" type="submit">Buscar</button></div>
@@ -331,7 +318,7 @@
 				  	<td style='border: 2px solid black'><%out.print(p.getTipo().name());%></td>
 				  	<td style='border: 2px solid black'>
 					  	<div class="row" style="margin: auto;">
-						  	<form action="ControladorPersona" method="post" name="personas">
+						  	<form action="ServletPersona" method="post" name="personas">
 								<input type="hidden" name="instruccion" value="buscar_persona_a_editar">
 								<input type="hidden" name="dni" value="<%=p.getDni()%>">
 								<div style="background-color: #C9DFEA;"><button type="submit" class="btn btn-outline-primary btn-sm" style="width: 70px; color: black;">Editar</button></div>
@@ -341,7 +328,7 @@
 							<div style="background-color: #FFD5D3;"><button type="button" class="btn btn-outline-danger btn-sm" style="width: 70px; color: black;" onclick="abrirEliminar('<%=p.getDni()%>')">Eliminar</button></div>
 							&nbsp;
 							 
-							<form action="ControladorUsuario" method="post" name="usuario">
+							<form action="ServletUsuario" method="post" name="usuario">
 								<input type="hidden" name="instruccion" value="buscar_por_dni">
 								<input type="hidden" name="dni" value="<%=p.getDni()%>">
 								<div style="background-color: #EFF9A4;"><button type="submit" class="btn btn-outline-warning btn-sm" style="width: 70px; color: black;">Usuario</button></div>
@@ -395,6 +382,10 @@
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 </body>
 </html>
-<%
-}}
-%>
+<%}}}
+catch(Exception e)
+{
+	RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+	request.setAttribute("exception", e);
+	dispatcher.forward(request, response);
+}%>

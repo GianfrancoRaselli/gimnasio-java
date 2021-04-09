@@ -1,4 +1,4 @@
-package Controlador;
+package Servlets;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,76 +14,55 @@ import javax.servlet.http.HttpSession;
 import Entidades.*;
 import Modelo.*;
 
-@WebServlet("/ControladorPagarCuotas")
-public class ControladorPagarCuotas extends HttpServlet {
+@WebServlet("/ServletPagarCuotas")
+public class ServletPagarCuotas extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
-		HttpSession sesion = request.getSession();
-		
 		try
 		{
+			HttpSession sesion = request.getSession();
+			
 			if(sesion.getAttribute("usuario") != null)
 			{
-				Usuario user = (Usuario)sesion.getAttribute("usuario");
-				
-				if(user.getNivelUsuario().getDescripcion().equals("usuario"))
-				{
-					response.sendRedirect("Inicio.jsp");
-				}
-				else if(user.getNivelUsuario().getDescripcion().equals("administrador"))
-				{
-					response.sendRedirect("Personas.jsp");
-				}
+				response.sendRedirect("Inicio.jsp");
 			}
 			else
 			{
 				response.sendRedirect("Login.jsp");
 			}
 		}
-		catch(IOException e)
+		catch(Exception e)
 		{
-			e.printStackTrace();
+			RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+			request.setAttribute("exception", e);
+			dispatcher.forward(request, response);
 		}
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  
 	{
-		HttpSession sesion = request.getSession();
-		
-		if(sesion.getAttribute("usuario") == null)
+		try
 		{
-			try 
+			HttpSession sesion = request.getSession();
+			
+			if(sesion.getAttribute("usuario") == null)
 			{
 				response.sendRedirect("Login.jsp");
-			} 
-			catch (IOException e) 
+			}
+			else
 			{
-				e.printStackTrace();
-			} 
-		}
-		else
-		{
-			Usuario userSesion = (Usuario)sesion.getAttribute("usuario");
-			
-			if(userSesion.getNivelUsuario().getDescripcion().equals("usuario"))
-			{
-				try 
+				Usuario userSesion = (Usuario)sesion.getAttribute("usuario");
+				
+				if(userSesion.getNivelUsuario().getDescripcion().equals("usuario"))
 				{
 					response.sendRedirect("Login.jsp");
-				} 
-				catch (IOException e) 
-				{
-					e.printStackTrace();
-				} 
-			}
-			else if(userSesion.getNivelUsuario().getDescripcion().equals("administrador"))
-			{
-				try
+				}
+				else if(userSesion.getNivelUsuario().getDescripcion().equals("administrador"))
 				{
 					String comando = request.getParameter("instruccion");
-					
+						
 					switch(comando)
 					{
 						case "buscar_persona":
@@ -94,15 +73,17 @@ public class ControladorPagarCuotas extends HttpServlet {
 							break;
 					}
 				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-				}
 			}
+		}
+		catch(Exception e)
+		{
+			RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+			request.setAttribute("exception", e);
+			dispatcher.forward(request, response);
 		}
 	}
 	
-	public void BuscarPersona(HttpServletRequest request, HttpServletResponse response)
+	public void BuscarPersona(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		Persona p = new Persona();
 		p.setDni(request.getParameter("dni"));
@@ -114,37 +95,23 @@ public class ControladorPagarCuotas extends HttpServlet {
 		{
 			CuotaLogic cl = new CuotaLogic();
 			ArrayList<Cuota> cuotasImpagas = (ArrayList<Cuota>) cl.BuscarCuotasImpagas(p);
-			
+				
 			RequestDispatcher dispatcher = request.getRequestDispatcher("PagarCuotas.jsp");
 			request.setAttribute("persona", p);
 			request.setAttribute("cuotasImpagas", cuotasImpagas);
-			
-			try 
-			{
-				dispatcher.forward(request, response);
-			} 
-			catch (ServletException | IOException e) 
-			{
-				e.printStackTrace();
-			}
+				
+			dispatcher.forward(request, response);
 		}
 		else 
 		{
 			RequestDispatcher dispatcher = request.getRequestDispatcher("BuscarPersona.jsp");
 			request.setAttribute("personaNoEncontrada", request.getParameter("dni"));
 			
-			try 
-			{
-				dispatcher.forward(request, response);
-			} 
-			catch (ServletException | IOException e) 
-			{
-				e.printStackTrace();
-			}
+			dispatcher.forward(request, response);
 		}
 	}
 	
-	public void PagarCuota(HttpServletRequest request, HttpServletResponse response)
+	public void PagarCuota(HttpServletRequest request, HttpServletResponse response) throws Exception 
 	{
 		Cuota c = new Cuota();
 		Persona p = new Persona();
@@ -157,25 +124,16 @@ public class ControladorPagarCuotas extends HttpServlet {
 		RequestDispatcher dispatcher = request.getRequestDispatcher("PagarCuotas.jsp");
 		
 		CuotaLogic cl = new CuotaLogic();
-		if(!cl.PagarCuota(c))
-		{
-			request.setAttribute("modal", "errorAlPagarCuota");
-		}
+		cl.PagarCuota(c);
 		
 		PersonaLogic pl = new PersonaLogic();
 		p = pl.BuscarPersona(p);
+		
 		ArrayList<Cuota> cuotasImpagas = (ArrayList<Cuota>) cl.BuscarCuotasImpagas(p);
 		
 		request.setAttribute("persona", p);
 		request.setAttribute("cuotasImpagas", cuotasImpagas);
 		
-		try 
-		{
-			dispatcher.forward(request, response);
-		} 
-		catch (ServletException | IOException e) 
-		{
-			e.printStackTrace();
-		}
+		dispatcher.forward(request, response);
 	}
 }

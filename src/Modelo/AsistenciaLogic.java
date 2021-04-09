@@ -5,9 +5,15 @@ import Entidades.*;
 
 public class AsistenciaLogic 
 {
-	public boolean AgregarAsistencia(Asistencia a)
+	private AdaptadorAsistencia asistenciaAdapter;
+	
+	public AsistenciaLogic()
 	{
-		AdaptadorAsistencia asistenciaAdapter = new AdaptadorAsistencia();
-		return asistenciaAdapter.Insert(a);
+		asistenciaAdapter = new AdaptadorAsistencia();
+	}
+	
+	public void AgregarAsistencia(Asistencia a) throws Exception
+	{
+		asistenciaAdapter.Insert(a);
 	}
 }

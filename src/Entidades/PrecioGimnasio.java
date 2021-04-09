@@ -1,22 +1,23 @@
 package Entidades;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 public class PrecioGimnasio 
 {
 	public PrecioGimnasio() {
 		super();
 	}
-	private Date fechaHoraDesde;
+	private Timestamp fechaHoraDesde;
+	private String fechaHoraDesdeString;
 	private double precio;
 	@Override
 	public String toString() {
 		return "PrecioGimnasio [fechaHoraDesde=" + fechaHoraDesde + ", precio=" + precio + "]";
 	}
-	public Date getFechaHoraDesde() {
+	public Timestamp getFechaHoraDesde() {
 		return fechaHoraDesde;
 	}
-	public void setFechaHoraDesde(Date fechaHoraDesde) {
+	public void setFechaHoraDesde(Timestamp fechaHoraDesde) {
 		this.fechaHoraDesde = fechaHoraDesde;
 	}
 	public double getPrecio() {
@@ -47,5 +48,11 @@ public class PrecioGimnasio
 		} else if (!fechaHoraDesde.equals(other.fechaHoraDesde))
 			return false;
 		return true;
+	}
+	public String getFechaHoraDesdeString() {
+		return fechaHoraDesdeString;
+	}
+	public void setFechaHoraDesdeString(String fechaHoraDesdeString) {
+		this.fechaHoraDesdeString = fechaHoraDesdeString;
 	}
 }

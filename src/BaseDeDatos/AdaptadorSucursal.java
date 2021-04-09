@@ -3,7 +3,6 @@ package BaseDeDatos;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -11,7 +10,7 @@ import Entidades.*;
 
 public class AdaptadorSucursal 
 {
-	public Sucursal GetOne(Sucursal s)
+	public Sucursal GetOne(Sucursal s) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -19,11 +18,11 @@ public class AdaptadorSucursal
 		PreparedStatement statement = null;
 		ResultSet rs = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, s.getNombreSucursal());
 			
@@ -31,13 +30,14 @@ public class AdaptadorSucursal
 			
 			if(rs!=null && rs.next())
 			{
+				AdaptadorCiudad ciudadAdapter = new AdaptadorCiudad();
+				
 				Ciudad ciudad = new Ciudad();
 				ciudad.setCodPostal(rs.getString("cod_postal"));
+				s.setCiudad(ciudadAdapter.GetOne(ciudad));
 				
 				s.setNombreSucursal(rs.getString("nombre_sucursal"));
 				s.setDireccion(rs.getString("direccion"));
-				
-				s.setCiudad(ciudad);
 			}
 			else
 			{
@@ -46,42 +46,20 @@ public class AdaptadorSucursal
 		}
 		catch(Exception e)
 		{
-			s = null;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar sucursal", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return s;
 	}
 	
-	public Collection<Sucursal> BuscarPorNombreSucursal(String nombreSucursal)
+	public Collection<Sucursal> BuscarPorNombreSucursal(String nombreSucursal) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -90,11 +68,11 @@ public class AdaptadorSucursal
 		ResultSet rs = null;
 		Collection<Sucursal> sucursales = new ArrayList<Sucursal>();
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, "%" + nombreSucursal + "%");
 			
@@ -104,15 +82,16 @@ public class AdaptadorSucursal
 			{
 				while(rs.next())
 				{
+					AdaptadorCiudad ciudadAdapter = new AdaptadorCiudad();
+					
 					Sucursal s = new Sucursal();
 					
 					Ciudad ciudad = new Ciudad();
 					ciudad.setCodPostal(rs.getString("cod_postal"));
+					s.setCiudad(ciudadAdapter.GetOne(ciudad));
 					
 					s.setNombreSucursal(rs.getString("nombre_sucursal"));
 					s.setDireccion(rs.getString("direccion"));
-					
-					s.setCiudad(ciudad);
 					
 					sucursales.add(s);
 				}
@@ -120,41 +99,20 @@ public class AdaptadorSucursal
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar sucursales", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return sucursales;
 	}
 	
-	public Collection<Sucursal> FindAll()
+	public Collection<Sucursal> FindAll() throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -163,11 +121,11 @@ public class AdaptadorSucursal
 		ResultSet rs = null;
 		Collection<Sucursal> sucursales = new ArrayList<Sucursal>();
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			
 			rs = statement.executeQuery();
@@ -176,10 +134,13 @@ public class AdaptadorSucursal
 			{
 				while(rs.next())
 				{
+					AdaptadorCiudad ciudadAdapter = new AdaptadorCiudad();
+					
 					Sucursal s = new Sucursal();
 					
 					Ciudad ciudad = new Ciudad();
 					ciudad.setCodPostal(rs.getString("cod_postal"));
+					s.setCiudad(ciudadAdapter.GetOne(ciudad));
 					
 					s.setNombreSucursal(rs.getString("nombre_sucursal"));
 					s.setDireccion(rs.getString("direccion"));
@@ -192,53 +153,31 @@ public class AdaptadorSucursal
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar sucursales", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return sucursales;
 	}
 	
-	public boolean Delete(Sucursal s)
+	public void Delete(Sucursal s) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "DELETE FROM sucursales WHERE BINARY nombre_sucursal=?";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, s.getNombreSucursal());
 			
@@ -246,46 +185,28 @@ public class AdaptadorSucursal
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al eliminar sucursal", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 	
-	public boolean Insert(Sucursal s)
+	public void Insert(Sucursal s) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "INSERT INTO sucursales (nombre_sucursal, direccion, cod_postal) VALUES (?, ?, ?)";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, s.getNombreSucursal());
 			statement.setString(2, s.getDireccion());
@@ -295,46 +216,28 @@ public class AdaptadorSucursal
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al agregar sucursal", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 	
-	public boolean Update(Sucursal s)
+	public void Update(Sucursal s) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "UPDATE sucursales SET nombre_sucursal=?, direccion=?, cod_postal=? WHERE nombre_sucursal=?";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, s.getNombreSucursal());
 			statement.setString(2, s.getDireccion());
@@ -345,30 +248,13 @@ public class AdaptadorSucursal
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al actualizar sucursal", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 }

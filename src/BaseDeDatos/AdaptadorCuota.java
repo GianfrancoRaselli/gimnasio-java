@@ -3,16 +3,15 @@ package BaseDeDatos;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 
 import Entidades.*;
+import Util.FormateoHora;
 
 public class AdaptadorCuota 
 {
-	public ActualizacionCuotas BuscarUltimaActualizacion()
+	public ActualizacionCuotas BuscarUltimaActualizacion() throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -21,11 +20,11 @@ public class AdaptadorCuota
 		ResultSet rs = null;
 		ActualizacionCuotas ac = null;
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			
 			rs = statement.executeQuery();
@@ -39,53 +38,31 @@ public class AdaptadorCuota
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar actualizacion de cuotas", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return ac;
 	}
 	
-	public boolean Insert(Cuota cuota)
+	public void Insert(Cuota cuota) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "INSERT INTO cuotas (dni, anio, mes, total) VALUES (?, ?, ?, ?)";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, cuota.getPersona().getDni());
 			statement.setInt(2, cuota.getAnio());
@@ -96,46 +73,70 @@ public class AdaptadorCuota
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al insertar cuota", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 	
-	public boolean InsertActualizacionCuotas(ActualizacionCuotas ac)
+	public void InsertCuotas(ArrayList<Cuota> cuotas) throws Exception
+	{
+		ConnectionPool connectionPool = null;
+		Connection conn = null;
+		String instruccion = "INSERT INTO cuotas (dni, anio, mes, total) VALUES (?, ?, ?, ?)";
+		PreparedStatement statement = null;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+			
+		try
+		{
+			conn.setAutoCommit(false);
+			
+			statement = conn.prepareStatement(instruccion);
+				
+			for(Cuota cuota: cuotas)
+			{
+				statement.setString(1, cuota.getPersona().getDni());
+				statement.setInt(2, cuota.getAnio());
+				statement.setInt(3, cuota.getMes());
+				statement.setDouble(4, cuota.getTotal());
+				
+				statement.executeUpdate();
+			}
+			
+			conn.commit();
+		}
+		catch(Exception e)
+		{
+			conn.rollback();
+				
+			Exception excepcionManejada = new Exception("Error al insertar cuotas", e);
+			throw excepcionManejada;
+		}
+		finally
+		{
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
+		}
+	}
+	
+	public void InsertActualizacionCuotas(ActualizacionCuotas ac) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "INSERT INTO actualizaciones_cuotas (anio, mes) VALUES (?, ?)";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setInt(1, ac.getAnio());
 			statement.setInt(2, ac.getMes());
@@ -144,34 +145,17 @@ public class AdaptadorCuota
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al insertar actualizacion de cuotas", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 	
-	public Collection<Cuota> BuscarCuotasImpagas(Persona p)
+	public Collection<Cuota> BuscarCuotasImpagas(Persona p) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -180,11 +164,11 @@ public class AdaptadorCuota
 		ResultSet rs = null;
 		Collection<Cuota> cuotasImpagas = new ArrayList<Cuota>();
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, p.getDni());
 			
@@ -207,41 +191,20 @@ public class AdaptadorCuota
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar cuotas impagas", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return cuotasImpagas;
 	}
 	
-	public Collection<Cuota> BuscarCuotasDePersona(Persona p)
+	public Collection<Cuota> BuscarCuotasDePersona(Persona p) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
@@ -250,11 +213,11 @@ public class AdaptadorCuota
 		ResultSet rs = null;
 		Collection<Cuota> cuotas = new ArrayList<Cuota>();
 		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
+		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
 			statement.setString(1, p.getDni());
 			
@@ -270,7 +233,7 @@ public class AdaptadorCuota
 					cuota.setAnio(rs.getInt("anio"));
 					cuota.setMes(rs.getInt("mes"));
 					cuota.setTotal(rs.getDouble("total"));
-					cuota.setFechaHoraPago(rs.getDate("fecha_hora_pago"));
+					cuota.setFechaHoraPago(rs.getTimestamp("fecha_hora_pago"));
 					
 					cuotas.add(cuota);
 				}
@@ -278,110 +241,33 @@ public class AdaptadorCuota
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al buscar cuotas de la persona", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(rs != null) rs.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(rs != null) rs.close();
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
 		
 		return cuotas;
 	}
 	
-	public boolean PagarCuota(Cuota cuota)
+	public void PagarCuota(Cuota cuota) throws Exception
 	{
 		ConnectionPool connectionPool = null;
 		Connection conn = null;
 		String instruccion = "UPDATE cuotas SET fecha_hora_pago=? WHERE dni=? and anio=? and mes=?";
 		PreparedStatement statement = null;
-		boolean devolucion = true;
+		
+		connectionPool = ConnectionPool.getInstance();
+		conn = connectionPool.getConnection();
 		
 		try
-		{
-			connectionPool = ConnectionPool.getInstance();
-			conn = connectionPool.getConnection();
-			
+		{	
 			statement = conn.prepareStatement(instruccion);
-			
-			Calendar c = Calendar.getInstance();
-			
-			String anio = String.valueOf(c.get(Calendar.YEAR)); 
-			
-			String mes;
-			if(c.get(Calendar.MONTH) + 1 < 10)
-			{
-				mes = "0" + String.valueOf(c.get(Calendar.MONTH) + 1);
-			}
-			else
-			{
-				mes = String.valueOf(c.get(Calendar.MONTH) + 1);
-			}
-			
-			String dia;
-			if(c.get(Calendar.DAY_OF_MONTH) < 10)
-			{
-				dia = "0" + String.valueOf(c.get(Calendar.DAY_OF_MONTH));
-			}
-			else
-			{
-				dia = String.valueOf(c.get(Calendar.DAY_OF_MONTH));
-			}
-			
-			String hora;
-			if(c.get(Calendar.HOUR_OF_DAY) < 10)
-			{
-				hora = "0" + String.valueOf(c.get(Calendar.HOUR_OF_DAY));
-			}
-			else
-			{
-				hora = String.valueOf(c.get(Calendar.HOUR_OF_DAY));
-			}
-			
-			String min;
-			if(c.get(Calendar.MINUTE) < 10)
-			{
-				min = "0" + String.valueOf(c.get(Calendar.MINUTE));
-			}
-			else
-			{
-				min = String.valueOf(c.get(Calendar.MINUTE));
-			}
-			
-			String seg;
-			if(c.get(Calendar.SECOND) < 10)
-			{
-				seg = "0" + String.valueOf(c.get(Calendar.SECOND));
-			}
-			else
-			{
-				seg = String.valueOf(c.get(Calendar.SECOND));
-			}
-			
-			statement.setString(1, anio + mes + dia + hora + min + seg);
+			statement.setString(1, FormateoHora.getFechaHoraActualEnFormatoBDD());
 			statement.setString(2, cuota.getPersona().getDni());
 			statement.setInt(3, cuota.getAnio());
 			statement.setInt(4, cuota.getMes());
@@ -390,30 +276,13 @@ public class AdaptadorCuota
 		}
 		catch(Exception e)
 		{
-			devolucion = false;
-			e.printStackTrace();
+			Exception excepcionManejada = new Exception("Error al registrar pago de cuota", e);
+			throw excepcionManejada;
 		}
 		finally
 		{
-			try
-			{
-				try 
-				{
-					if(statement != null) statement.close();
-				} 
-				catch (SQLException e1) 
-				{
-					e1.printStackTrace();
-				}
-				
-				connectionPool.closeConnection(conn);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			if(statement != null) statement.close();
+			connectionPool.closeConnection(conn);
 		}
-		
-		return devolucion;
 	}
 }

@@ -10,6 +10,7 @@ public class TipoClasePersonalizada
 	private int codTipoClasePersonalizada;
 	private String nombre;
 	private String descripcion;
+	private double precioPorClase;
 	private Collection<ClasePersonalizada> clasesPersonalizadas;
 	@Override
 	public String toString() {
@@ -62,5 +63,11 @@ public class TipoClasePersonalizada
 		if (codTipoClasePersonalizada != other.codTipoClasePersonalizada)
 			return false;
 		return true;
+	}
+	public double getPrecioPorClase() {
+		return precioPorClase;
+	}
+	public void setPrecioPorClase(double precioPorClase) {
+		this.precioPorClase = precioPorClase;
 	}
 }

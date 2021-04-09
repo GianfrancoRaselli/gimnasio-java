@@ -1,9 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8" session="true"%>
     
-<%@ page import="Entidades.*, Controlador.*"%>
+<%@ page import="Entidades.*, Controlador.*, Servlets.*"%>
 
-	<% 
+	<%
+	try
+	{
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response.setHeader("Pragma", "no-cache");
 		response.setHeader("Expires", "0");
@@ -117,9 +119,10 @@
 </style>
 
 </head>
-<body>
 
-		<form action="ControladorRecuperarContrasenia" method="post" name="login" onsubmit="return validar();">
+<body style="padding-right: 1%; padding-left: 1%;">
+
+		<form action="ServletRecuperarContrasenia" method="post" name="login" onsubmit="return validar();">
 			<input type="hidden" name="instruccion" value="recuperar_contrasenia">
 			<div class="recover">
 				<div class="recover-screen">
@@ -170,8 +173,8 @@
 					<% 
 						if(request.getAttribute("errorCambioContrasenia") != null)
 						{%>
-							<div id="codigoIncorrecto" style="color: red; margin-top: 5%; text-align: center;">
-								<p>Error al cambiar contraeña</p>
+							<div id="contraseniaIncorrecta" style="color: red; margin-top: 5%; text-align: center;">
+								<p>Error al cambiar contraseña</p>
 							</div>							
 						<%}
 					%>
@@ -207,4 +210,10 @@
 			
 </body>
 </html>
-<%}%>
+<%}}
+catch(Exception e)
+{
+	RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+	request.setAttribute("exception", e);
+	dispatcher.forward(request, response);
+}%>

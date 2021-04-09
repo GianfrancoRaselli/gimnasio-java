@@ -7,53 +7,56 @@ import Entidades.*;
 
 public class SucursalLogic 
 {
-	public Sucursal BuscarSucursal(Sucursal s)
+	private AdaptadorSucursal sucursalAdapter;
+	
+	public SucursalLogic()
 	{
-		AdaptadorSucursal sucursalAdapter = new AdaptadorSucursal();
+		sucursalAdapter = new AdaptadorSucursal();
+	}
+	
+	public Sucursal BuscarSucursal(Sucursal s) throws Exception
+	{
 		return sucursalAdapter.GetOne(s);
 	}
 	
-	public Collection<Sucursal> BuscarPorNombreSucursal(String nombreSucursal)
+	public Collection<Sucursal> BuscarPorNombreSucursal(String nombreSucursal) throws Exception
 	{
-		AdaptadorSucursal sucursalAdapter = new AdaptadorSucursal();
 		return sucursalAdapter.BuscarPorNombreSucursal(nombreSucursal);
 	}
 	
-	public Collection<Sucursal> BuscarSucursales()
+	public Collection<Sucursal> BuscarSucursales() throws Exception
 	{
-		AdaptadorSucursal sucursalAdapter = new AdaptadorSucursal();
 		return sucursalAdapter.FindAll();
 	}
 	
-	public boolean EliminarSucursal(Sucursal s)
+	public void EliminarSucursal(Sucursal s) throws Exception
 	{
-		AdaptadorSucursal sucursalAdapter = new AdaptadorSucursal();
-		return sucursalAdapter.Delete(s);
+		sucursalAdapter.Delete(s);
 	}
 	
-	public boolean AgregarSucursal(Sucursal s)
+	public void AgregarSucursal(Sucursal s) throws Exception
 	{
 		if(s.getNombreSucursal() != "" && s.getDireccion() != "" && s.getCiudad().getCodPostal() != null)
 		{
-			AdaptadorSucursal sucursalAdapter = new AdaptadorSucursal();
-			return sucursalAdapter.Insert(s);
+			sucursalAdapter.Insert(s);
 		}
 		else
 		{
-			return false;
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
 		}
 	}
 	
-	public boolean ActualizarSucursal(Sucursal s)
+	public void ActualizarSucursal(Sucursal s) throws Exception
 	{
 		if(s.getId() != "" && s.getNombreSucursal() != "" && s.getDireccion() != "" && s.getCiudad().getCodPostal() != null)
 		{
-			AdaptadorSucursal sucursalAdapter = new AdaptadorSucursal();
-			return sucursalAdapter.Update(s);
+			sucursalAdapter.Update(s);
 		}
 		else
 		{
-			return false;
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
 		}
 	}
 }

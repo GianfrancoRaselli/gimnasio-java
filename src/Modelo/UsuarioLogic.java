@@ -2,113 +2,85 @@ package Modelo;
 
 import BaseDeDatos.*;
 import Entidades.*;
+import Util.Encriptacion;
 
 public class UsuarioLogic 
 {
-	public Usuario BuscarPorDni(Usuario user)
+	private AdaptadorUsuario userAdapter;
+	
+	public UsuarioLogic()
 	{
-		AdaptadorUsuario userAdapter = new AdaptadorUsuario();
-		AdaptadorPersona personaAdapter = new AdaptadorPersona();
-		AdaptadorNivelUsuario nivelAdapter = new AdaptadorNivelUsuario();
-		
-		user = userAdapter.BuscarPorDni(user);
-		
-		if(user != null)
+		userAdapter = new AdaptadorUsuario();
+	}
+	
+	public Usuario BuscarPorDni(Usuario user) throws Exception
+	{
+		return userAdapter.BuscarPorDni(user);
+	}
+	
+	public Usuario BuscarUsuario(Usuario user) throws Exception
+	{
+		return userAdapter.GetOne(user);
+	}
+	
+	public void EliminarUsuario(Usuario user) throws Exception
+	{
+		userAdapter.Delete(user);
+	}
+	
+	public void AgregarUsuario(Usuario user) throws Exception
+	{
+		if(user.getNombreUsuario().length() >= 6 && user.getContrasenia().length() >= 8 && user.getNivelUsuario().getNroNivel() != 0)
 		{
-			user.setNivelUsuario(nivelAdapter.GetOne(user.getNivelUsuario()));
-			user.setPersona(personaAdapter.GetOne(user.getPersona()));
+			user.setContraseniaEncriptada(Encriptacion.Encriptar(user.getContrasenia()));
+			userAdapter.Insert(user);
 		}
 		else
 		{
-			return null;
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
 		}
-		
-		return user;
 	}
 	
-	public Usuario BuscarUsuario(Usuario user)
+	public void EditarUsuario(Usuario user) throws Exception
 	{
-		if(user.getNombreUsuario().length() >= 6)
+		if(user.getNombreUsuario().length() >= 6 && user.getContrasenia().length() >= 8 && user.getNivelUsuario().getNroNivel() != 0)
 		{
-			AdaptadorUsuario userAdapter = new AdaptadorUsuario();
-			AdaptadorPersona personaAdapter = new AdaptadorPersona();
-			AdaptadorNivelUsuario nivelAdapter = new AdaptadorNivelUsuario();
-				
-			user = userAdapter.GetOne(user);
-				
-			if(user != null)
-			{
-				user.setNivelUsuario(nivelAdapter.GetOne(user.getNivelUsuario()));
-				user.setPersona(personaAdapter.GetOne(user.getPersona()));
-			}
-			else
-			{
-				return null;
-			}
-		}
-		else 
-		{
-			return null;
-		}
-		
-		return user;
-	}
-	
-	public boolean EliminarUsuario(Usuario user)
-	{
-		AdaptadorUsuario userAdapter = new AdaptadorUsuario();
-		return userAdapter.Delete(user);
-	}
-	
-	public boolean AgregarUsuario(Usuario user)
-	{
-		if(user.getNombreUsuario() != "" && user.getContrasenia() != "" && user.getNivelUsuario().getNroNivel() != 0)
-		{
-			AdaptadorUsuario userAdapter = new AdaptadorUsuario();
-			return userAdapter.Insert(user);
+			user.setContraseniaEncriptada(Encriptacion.Encriptar(user.getContrasenia()));
+			userAdapter.Update(user);
 		}
 		else
 		{
-			return false;
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
 		}
 	}
 	
-	public boolean EditarUsuario(Usuario user)
+	public void EditarPerfil(Usuario user) throws Exception
 	{
-		if(user.getNombreUsuario() != "" && user.getContrasenia() != "" && user.getNivelUsuario().getNroNivel() != 0)
+		if(user.getNombreUsuario().length() >= 6 && user.getContrasenia().length() >= 8)
 		{
-			AdaptadorUsuario userAdapter = new AdaptadorUsuario();
-			return userAdapter.Update(user);
+			user.setContraseniaEncriptada(Encriptacion.Encriptar(user.getContrasenia()));
+			userAdapter.UpdatePerfil(user);
 		}
 		else
 		{
-			return false;
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
 		}
 	}
 	
-	public boolean EditarPerfil(Usuario user)
+	public void CambiarContrasenia(Usuario user) throws Exception
 	{
-		if(user.getNombreUsuario() != "" && user.getContrasenia() != "")
+		if(user.getNombreUsuario().length() >= 6 && user.getContrasenia().length() >= 8)
 		{
-			AdaptadorUsuario userAdapter = new AdaptadorUsuario();
-			return userAdapter.UpdatePerfil(user);
+			user.setContraseniaEncriptada(Encriptacion.Encriptar(user.getContrasenia()));
+			userAdapter.CambiarContrasenia(user);
 		}
 		else
 		{
-			return false;
-		}
-	}
-	
-	public boolean CambiarContrasenia(Usuario user)
-	{
-		if(user.getNombreUsuario() != "" && user.getContrasenia() != "")
-		{
-			AdaptadorUsuario userAdapter = new AdaptadorUsuario();
-			return userAdapter.CambiarContrasenia(user);
-		}
-		else
-		{
-			return false;
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
 		}
 	}
 }

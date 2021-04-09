@@ -1,6 +1,6 @@
 package Entidades;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 public class Asistencia 
 {	
@@ -9,7 +9,7 @@ public class Asistencia
 	}
 	private Persona persona;
 	private Sucursal sucursal;
-	private Date fechaHora;
+	private Timestamp fechaHora;
 	@Override
 	public String toString() {
 		return "Asistencia [persona=" + persona + ", sucursal=" + sucursal + ", fechaHora=" + fechaHora + "]";
@@ -26,10 +26,10 @@ public class Asistencia
 	public void setSucursal(Sucursal sucursal) {
 		this.sucursal = sucursal;
 	}
-	public Date getFechaHora() {
+	public Timestamp getFechaHora() {
 		return fechaHora;
 	}
-	public void setFechaHora(Date fechaHora) {
+	public void setFechaHora(Timestamp fechaHora) {
 		this.fechaHora = fechaHora;
 	}
 	@Override

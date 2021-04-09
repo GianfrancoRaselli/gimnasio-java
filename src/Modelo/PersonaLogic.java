@@ -7,63 +7,67 @@ import Entidades.Persona;
 
 public class PersonaLogic 
 {
-	public Persona BuscarPersona(Persona p)
+	private AdaptadorPersona personaAdapter;
+	
+	public PersonaLogic()
 	{
-		AdaptadorPersona personaAdapter = new AdaptadorPersona();
+		personaAdapter = new AdaptadorPersona();
+	}
+	
+	public Persona BuscarPersona(Persona p) throws Exception
+	{
 		return personaAdapter.GetOne(p);
 	}
 	
-	public Collection<Persona> BuscarPersonas()
+	public Collection<Persona> BuscarPersonas() throws Exception
 	{
-		AdaptadorPersona personaAdapter = new AdaptadorPersona();
 		return personaAdapter.FindAll();
 	}
 	
-	public boolean EliminarPersona(Persona p)
+	public void EliminarPersona(Persona p) throws Exception
 	{
-		AdaptadorPersona personaAdapter = new AdaptadorPersona();
-		return personaAdapter.Delete(p);
+		personaAdapter.Delete(p);
 	}
 	
-	public boolean AgregarPersona(Persona p)
+	public void AgregarPersona(Persona p) throws Exception
 	{
 		if(p.getDni() != "" && p.getNombreApellido() != "" && p.getTelefono() != "" && p.getEmail() != "" && p.getDireccion() != "" && 
 				p.getTipo() != null && p.getCiudad().getCodPostal() != null)
 		{
-			AdaptadorPersona personaAdapter = new AdaptadorPersona();
-			return personaAdapter.Insert(p);
+			personaAdapter.Insert(p);
 		}
 		else
 		{
-			return false;
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
 		}
 	}
 	
-	public boolean EditarPersona(Persona p)
+	public void EditarPersona(Persona p) throws Exception
 	{
 		if(p.getId() != "" && p.getDni() != "" && p.getNombreApellido() != "" && p.getTelefono() != "" && p.getEmail() != "" && p.getDireccion() != "" && 
 				p.getTipo() != null && p.getCiudad().getCodPostal() != null)
 		{
-			AdaptadorPersona personaAdapter = new AdaptadorPersona();
-			return personaAdapter.Update(p);
+			personaAdapter.Update(p);
 		}
 		else
 		{
-			return false;
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
 		}
 	}
 	
-	public boolean EditarPerfil(Persona p)
+	public void EditarPerfil(Persona p) throws Exception
 	{
 		if(p.getDni() != "" && p.getNombreApellido() != "" && p.getTelefono() != "" && p.getEmail() != "" && p.getDireccion() != "" 
 				&& p.getCiudad().getCodPostal() != null)
 		{
-			AdaptadorPersona personaAdapter = new AdaptadorPersona();
-			return personaAdapter.UpdatePerfil(p);
+			personaAdapter.UpdatePerfil(p);
 		}
 		else
 		{
-			return false;
+			Exception excepcionManejada = new Exception("Error en los datos ingresados");
+			throw excepcionManejada;
 		}
 	}
 }

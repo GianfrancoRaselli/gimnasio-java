@@ -1,9 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8" session="true"%>
     
-<%@ page import="java.util.*, Entidades.*, Controlador.*"%>
+<%@ page import="java.util.*, Entidades.*, Controlador.*, Servlets.*, Util.*"%>
 
 	<% 
+	try
+	{
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response.setHeader("Pragma", "no-cache");
 		response.setHeader("Expires", "0");
@@ -27,17 +29,18 @@
 <meta name="description" content="">
 <meta name="keywords" content="">
 <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maxium-scale=1.0, minimum-scale=1.0">
-<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<script src="https://kit.fontawesome.com/5520773c7b.js" crossorigin="anonymous"></script> 
 <title>Mis rutinas</title>
 
-<style type="text/css">
-</style>
 </head>
 
 <body style="background-color:#E1E1E1; padding-right: 1%; padding-left: 1%;">
 	
+	<%if(userSesion.getNivelUsuario().getDescripcion().equals("administrador"))
+	{%>
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		  <a class="navbar-brand">Administrador</a>
+		  <a class="navbar-brand" href="Inicio.jsp">Gimnasio</a>
 		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
 		    <span class="navbar-toggler-icon"></span>
 		  </button>
@@ -48,27 +51,28 @@
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 		      		<a class="dropdown-item" href="Personas.jsp">Ver todas las personas</a> 
 					<a class="dropdown-item" href="RegistrarPersona.jsp">Registrar nueva persona</a> 
+					<a class="dropdown-item" href="BuscarUsuario.jsp">Buscar usuario</a> 
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Cuotas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="PagarCuota.jsp">Pagar cuota</a> 
+					<a class="dropdown-item" href="BuscarPersona.jsp">Pagar cuotas</a> 
+					<a class="dropdown-item" href="MisCuotas.jsp">Mis cuotas</a> 
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
 		        <a style="color: orange" class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rutinas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a style="background-color: orange" class="dropdown-item" href="RegistrarRutina.jsp">Registrar nueva rutina</a> 
-					<a class="dropdown-item" href="Rutinas.jsp">Ver rutinas</a> 
+					<a class="dropdown-item" href="BuscarPersonaDeRutina.jsp">Registrar nueva rutina</a> 
+					<a style="background-color: orange" class="dropdown-item" href="MisRutinas.jsp">Mis rutinas</a> 
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Clases personalizadas</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-					<a class="dropdown-item" href="">Ver todas las clases personalizadas</a> 
-					<a class="dropdown-item" href="">Agregar nueva clase personalizada</a>
-					<a class="dropdown-item" href="">Registrarse a una clase personalizada</a> 
+		      		<a class="dropdown-item" href="Asistencias.jsp">Registrar asistencias</a>
+					<a class="dropdown-item" href="ClasesPersonalizadas.jsp">Ver clases personalizadas</a>
 		        </div>
 		      </li>
 		      <li class="nav-item dropdown">
@@ -82,30 +86,78 @@
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Entrada</a>
 		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-		      		<a class="dropdown-item" href="">Validar entrada</a> 
+		      		<a class="dropdown-item" href="ValidarEntrada.jsp">Validar entrada</a> 
 		        </div>
 		      </li>
 		    </ul>
+		    <ul class="navbar-nav user">
+			 	<li class="nav-item dropdown">
+				  	<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    	<i class="fas fa-user"></i>&nbsp;<%= userSesion.getNombreUsuario() %>
+				    </a>
+				    <div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
+				      	<a class="dropdown-item" href="Perfil.jsp"><i class="far fa-id-card"></i>&nbsp;Perfil</a>
+						<form action="ServletSesion" method="post" name="Cerrar">
+							<input type="hidden" name="instruccion" value="cerrar_sesion">
+							<button style="color: red;" class="dropdown-item" type="submit"><i class="fas fa-sign-out-alt"></i>&nbsp;Cerrar sesión</button>
+						</form> 
+				  	</div>
+				</li>
+			</ul>
 		  </div>
-		  <div style="margin-right: auto">
-			  <div class="collapse navbar-collapse" id="navbarNavDropdown">
-			  	<ul class="navbar-nav">
-			  		<li class="nav-item dropdown">
-				    	<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				       		<%= userSesion.getNombreUsuario() %>
-				        </a>
-				       	<div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
-				        	<a class="dropdown-item" href="Perfil.jsp">Perfil</a>
-							<form action="ControladorSesion" method="post" name="Cerrar">
-								<input type="hidden" name="instruccion" value="cerrar_sesion">
-								<button style="color: red;" class="dropdown-item" type="submit">Cerrar sesión</button>
-							</form> 
-				   		</div>
-					</li>
-			  	</ul>
-			  </div>
-			</div>
 		</nav>
+		<%}
+		else if(userSesion.getNivelUsuario().getDescripcion().equals("usuario"))
+		{%>
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+		  <a class="navbar-brand" href="Inicio.jsp">Gimnasio</a>
+		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+		    <span class="navbar-toggler-icon"></span>
+		  </button>
+		  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+		    <ul class="navbar-nav">
+		      <li class="nav-item dropdown">
+		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Cuotas</a>
+		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="MisCuotas.jsp">Mis cuotas</a> 
+		        </div>
+		      </li>
+		      <li class="nav-item dropdown">
+		        <a style="color: orange" class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rutinas</a>
+		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a style="background-color: orange" class="dropdown-item" href="MisRutinas.jsp">Mis rutinas</a> 
+		        </div>
+		      </li>
+		      <li class="nav-item dropdown">
+		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Clases personalizadas</a>
+		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="ClasesPersonalizadas.jsp">Ver clases personalizadas</a>
+		        </div>
+		      </li>
+		      <li class="nav-item dropdown">
+		        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sucursales</a>
+		      	<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+		      		<a class="dropdown-item" href="Horarios.jsp">Horarios sucursales</a>  
+		        </div>
+		      </li>
+		    </ul>
+		    <ul class="navbar-nav user">
+			 	<li class="nav-item dropdown">
+				  	<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    	<i class="fas fa-user"></i>&nbsp;<%= userSesion.getNombreUsuario() %>
+				    </a>
+				    <div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdownMenuLink">
+				      	<a class="dropdown-item" href="Perfil.jsp"><i class="far fa-id-card"></i>&nbsp;Perfil</a>
+						<form action="ServletSesion" method="post" name="Cerrar">
+							<input type="hidden" name="instruccion" value="cerrar_sesion">
+							<button style="color: red;" class="dropdown-item" type="submit"><i class="fas fa-sign-out-alt"></i>&nbsp;Cerrar sesión</button>
+						</form> 
+				  	</div>
+				</li>
+			</ul>
+		  </div>
+		</nav>
+		<%}%>
 		
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
 			<h2>Mis rutinas</h2>
@@ -114,22 +166,25 @@
      	<div style="margin-top: 1%;">
      	
      		<%
-     		if((request.getAttribute("rutina") == null))
-			{
-				ControladorRutina cr = new ControladorRutina();
-				cr.BuscarUltimaRutinaDelUsuario(request, response);
-			}
-     		
-     		if(request.getAttribute("rutina") != null)
-			{
-     			Rutina r = (Rutina) request.getAttribute("rutina");
-     			
-     			ControladorRutina cr = new ControladorRutina();
-				cr.BuscarRutinasDelUsuario(request, response);
-     			ArrayList<Rutina> rutinas = (ArrayList<Rutina>) request.getAttribute("rutinas");
+     			Rutina r = null;
+
+	     		if((request.getAttribute("rutina") == null))
+				{
+					ControladorRutina cr = new ControladorRutina();
+					r = cr.BuscarUltimaRutinaDelUsuario(userSesion);
+				}
+	     		else
+	     		{
+	     			r = (Rutina) request.getAttribute("rutina");
+	     		}
+	     		
+	     		if(r != null)
+				{
+	     			ControladorRutina cr = new ControladorRutina();
+	     			ArrayList<Rutina> rutinas = cr.BuscarRutinasDelUsuario(userSesion);
 			%>
 			
-			<form action="ControladorRutina" method="post" name="rutina" style="margin-bottom: 1%; padding-left: 1%;">
+			<form action="ServletRutina" method="post" name="rutina" style="margin-bottom: 1%; padding-left: 1%;">
 				<input type="hidden" name="instruccion" value="buscar_rutina">
 				
 				<div class="row">
@@ -138,64 +193,9 @@
 							if(rutinas != null)
 							{
 								for(Rutina rut: rutinas)
-								{
-									String anio = String.valueOf(rut.getFecha().getYear()+1900); 
-								
-									String mes;
-									if(rut.getFecha().getMonth()+1 < 10)
-									{
-										mes = "0" + String.valueOf(rut.getFecha().getMonth()+1);
-									}
-									else
-									{
-										mes = String.valueOf(rut.getFecha().getMonth()+1);
-									}
-									
-									String dia;
-									if(rut.getFecha().getDate() < 10)
-									{
-										dia = "0" + String.valueOf(rut.getFecha().getDate());
-									}
-									else
-									{
-										dia = String.valueOf(rut.getFecha().getDate());
-									}
-									
-									String hora;
-									if(rut.getHora().getHours()+3 < 10)
-									{
-										hora = "0" + String.valueOf(rut.getHora().getHours()+3);
-									}
-									else
-									{
-										hora = String.valueOf(rut.getHora().getHours()+3);
-									}
-									
-									String min;
-									if(rut.getHora().getMinutes() < 10)
-									{
-										min = "0" + String.valueOf(rut.getHora().getMinutes());
-									}
-									else
-									{
-										min = String.valueOf(rut.getHora().getMinutes());
-									}
-									
-									String seg;
-									if(rut.getHora().getSeconds() < 10)
-									{
-										seg = "0" + String.valueOf(rut.getHora().getSeconds());
-									}
-									else
-									{
-										seg = String.valueOf(rut.getHora().getSeconds());
-									}
-									
-									String clave = anio + mes + dia + hora + min + seg;%>
-														
-							  		<option value="<%=clave%>" <%if((r.getFecha().equals(rut.getFecha())) && (r.getHora().equals(rut.getHora()))){%>selected<%}%>>
-										<%if(rut.getFecha().getDate()<10){%>0<%}%><%=rut.getFecha().getDate()%>/<%if(rut.getFecha().getMonth()+1<10){%>0<%}%><%=rut.getFecha().getMonth()+1%>/<%=rut.getFecha().getYear()+1900%>&nbsp;-
-										<%if(rut.getHora().getHours()+3<10){%>0<%}%><%=rut.getHora().getHours()+3%>:<%if(rut.getHora().getMinutes()<10){%>0<%}%><%=rut.getHora().getMinutes()%>:<%if(rut.getHora().getSeconds()<10){%>0<%}%><%=rut.getHora().getSeconds()%>				
+								{%>						
+							  		<option value="<%=FormateoHora.getFechaHoraEnFormatoBDD(rut.getFechaHora())%>"<%if(r.getFechaHora().equals(rut.getFechaHora())){%>selected<%}%>>
+										<%=FormateoHora.getFechaHora(rut.getFechaHora())%>				
 									</option>
 								<% } 
 							}%>
@@ -206,8 +206,7 @@
 			
 			<div class="card">
 				<h5 class="card-header">
-					<%if(r.getFecha().getDate()<10){%>0<%}%><%=r.getFecha().getDate()%>/<%if(r.getFecha().getMonth()+1<10){%>0<%}%><%=r.getFecha().getMonth()+1%>/<%=r.getFecha().getYear()+1900%>&nbsp;-
-					<%if(r.getHora().getHours()+3<10){%>0<%}%><%=r.getHora().getHours()+3%>:<%if(r.getHora().getMinutes()<10){%>0<%}%><%=r.getHora().getMinutes()%>:<%if(r.getHora().getSeconds()<10){%>0<%}%><%=r.getHora().getSeconds()%>				
+					<%=FormateoHora.getFechaHora(r.getFechaHora())%>				
 				</h5>
 							
 				<div class="card-body">
@@ -275,7 +274,7 @@
 					<%}
 					else
 					{%>
-						<p>No hay ejercicios</p>
+						<h6><i class="fas fa-angle-right"></i>&nbsp;No hay ejercicios</h6>
 					<%}
 				}%>
 				</div>	
@@ -284,7 +283,7 @@
 			}
      		else
      		{%>
-     			<p>No tiene rutinas registradas</p>
+     			<h5><i class="fas fa-angle-right"></i>&nbsp;No tiene rutinas registradas</h5>
      		<%}
 			%>
 		</div>
@@ -296,6 +295,10 @@
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 </body>
 </html>
-<% 
-}
-%>
+<%}}
+catch(Exception e)
+{
+	RequestDispatcher dispatcher = request.getRequestDispatcher("Errores.jsp");
+	request.setAttribute("exception", e);
+	dispatcher.forward(request, response);
+}%>
